@@ -10,7 +10,7 @@ chmod +x build_generate
 
 Generate new jar
 
-- By running the command bellow, a new `codegen-0.0.1.jar` will be created e replaced the last one into `~/.m2/repository/com/softwareplace/codegen/0.0.1/`
+- By running the command bellow, a new `codegen-0.0.1.jar` will be created and replaced the last one at `~/.m2/repository/com/softwareplace/codegen/0.0.1/`
 
 ```shell
 ./build_generate
