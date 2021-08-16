@@ -3,13 +3,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>annotation</artifactId>
-        <groupId>org.example</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <artifactId>java-codegen</artifactId>
+        <groupId>com.softwareplace</groupId>
+        <version>0.0.1</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>api-test</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>test</artifactId>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/javax.inject/javax.inject -->
@@ -25,18 +30,13 @@
             <version>0.0.1</version>
             <scope>compile</scope>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
-            <groupId>org.example</groupId>
-            <artifactId>annotation-processor</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.7.2</version>
+            <scope>test</scope>
         </dependency>
+
     </dependencies>
-
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
-
 </project>

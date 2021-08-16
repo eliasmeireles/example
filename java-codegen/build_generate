@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cd codegen/ || exit
+
+mvn clean package
+
+rm -Rf ~/.m2/repository/com/softwareplace/codegen/0.0.1/
+
+mkdir -p ~/.m2/repository/com/softwareplace/codegen/0.0.1/
+
+cp target/codegen-0.0.1.jar ~/.m2/repository/com/softwareplace/codegen/0.0.1/
+cp pom.xml ~/.m2/repository/com/softwareplace/codegen/0.0.1/codegen-0.0.1.pom

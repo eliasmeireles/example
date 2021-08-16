@@ -1,0 +1,18 @@
+
+import com.softwareplace.config.Config;
+import com.softwareplace.config.DataSource;
+import java.util.ArrayList;
+import java.util.List;
+
+
+{annotatedWith}
+public class ConfigSourceImpl implements Config {
+	public ConfigSourceImpl() {
+	}
+
+	public List<DataSource> values() {
+		List<DataSource> objects = new ArrayList();
+		{dataSourceInstances}
+		return objects;
+	}
+}
