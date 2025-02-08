@@ -10,6 +10,7 @@ class JavaTestingApplicationTests {
 
     @Test
     fun contextLoads() {
+
     }
 
 }

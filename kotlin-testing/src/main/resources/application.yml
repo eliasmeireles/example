@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: kotlin-testing
+  security:
+    issuer: kotlin-testing
+    encrypt-strength: 10
+    pub-key: classpath://secret/public.key
+    private-key: classpath://secret/private.key
+    stack-trace-log-enable: true
+    jwt-expiration-time: 900
+    paths-redirect:
+      - name: "swagger-ui/index.html"
+        value: [ "/", "/docs", "/swagger" ]
+    open-url:
+      - "/swagger-resources/**"
+      - "/swagger-ui.html/**"
+      - "/swagger-config/**"
+      - "/authorization/gen"
+      - "/favicon.ico/**"
+      - "/v3/api-docs/**"
+      - "/authorization"
+      - "/swagger-ui/**"
+      - "/v3/api-docs"
+      - "/webjars/**"
+      - "/swagger/**"
+      - "/health/**"
+      - "/assets/**"
+      - "/error/**"
+      - "/csrf/**"
+      - "/swagger"
+      - "/docs"
+      - "/"
+
+
+server:
+  servlet:
+    context-path: /kotlin-testing/v1/
+  port: ${PORT:19898}

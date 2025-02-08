@@ -1,0 +1,129 @@
+openapi: 3.0.3
+info:
+  title: Kotlin Testing Api
+  description: |-
+    Kotlin Testing Api resources
+  version: 1.0.0
+paths:
+  /health:
+    get:
+      tags:
+        - Health Check
+      summary: Check application status
+      description: Check application status
+      operationId: healthGet
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        '500':
+          description: Error request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
+  /authorization:
+    post:
+      tags:
+        - Authorization
+      summary: Get api access authorization token
+      description: Get api access authorization token
+      operationId: getAuthorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInfo"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Authorization"
+        '403':
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        '500':
+          description: Error request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
+components:
+  parameters:
+    AccessToken:
+      in: header
+      required: true
+      name: Authorization
+      schema:
+        type: string
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+  schemas:
+    Data:
+      type: object
+      properties:
+        path:
+          items:
+            type: string
+
+    UserInfo:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+    Response:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        message:
+          type: string
+        success:
+          type: boolean
+        errorInfo:
+          type: object
+      required:
+        - timestamp
+        - message
+        - success
+    UserContent:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        authToken:
+          type: string
+      required:
+        - username
+        - password
+        - authToken
+
+    Authorization:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Response"
+      properties:
+        jwt:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      required:
+        - jwt
