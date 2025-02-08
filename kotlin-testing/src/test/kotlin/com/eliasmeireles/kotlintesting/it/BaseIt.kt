@@ -2,6 +2,7 @@ package com.eliasmeireles.kotlintesting.it
 
 import com.eliasmeireles.kotlintesting.it.config.TestcontainersConfiguration
 import io.restassured.RestAssured
+import io.restassured.config.LogConfig
 import io.restassured.specification.RequestSpecification
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
@@ -33,9 +34,16 @@ class BaseIt {
         RestAssured.port = port
         RestAssured.basePath = contextPath
 
+        val logConfig = LogConfig.logConfig()
+            .enablePrettyPrinting(true)
+
+        val config = RestAssured.config()
+            .logConfig(logConfig)
 
         spec = RestAssured.given()
-            .log().all()
-            .config(RestAssured.config())
+            .log()
+            .all(true)
+            .config(config)
+
     }
 }

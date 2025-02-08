@@ -24,6 +24,7 @@ spring:
       - "/webjars/**"
       - "/swagger/**"
       - "/health/**"
+      - "/health"
       - "/assets/**"
       - "/error/**"
       - "/csrf/**"
