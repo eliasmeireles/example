@@ -90,6 +90,8 @@ components:
     Response:
       type: object
       properties:
+        code:
+          type: integer
         timestamp:
           type: integer
           format: int64

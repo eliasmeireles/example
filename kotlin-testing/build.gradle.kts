@@ -14,24 +14,24 @@ kotlinOpenApiSettings {
     reactive = true
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    springBootStartWeb()
+    implementation("org.springframework.kafka:spring-kafka")
     springBootSecurityUtil()
+    springBootDataCommons()
+    springBootStartWeb()
+    springBootStarter()
+//    TODO(fix flyway migration bug for Unsupported Database: PostgreSQL <version>)
+//    flayWayMigration()
     springJettyApi()
     kotlinReactive()
     jsonLogger()
-    implementation("org.springframework.kafka:spring-kafka")
-    runtimeOnly("org.postgresql:postgresql")
+    postgresql()
 
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("io.rest-assured:kotlin-extensions:5.4.0")
+    testImplementation("io.rest-assured:rest-assured:5.3.2")
+    testImplementation("org.testcontainers:mongodb")
     testContainersPostgresql()
     testKotlinMockito()
-    testImplementation("io.rest-assured:rest-assured:5.3.2")
-    testImplementation("io.rest-assured:kotlin-extensions:5.4.0")
-    testImplementation("org.testcontainers:mongodb")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

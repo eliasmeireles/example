@@ -1,47 +1,65 @@
 package com.eliasmeireles.kotlintesting.it.config
 
-import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.ApplicationContextInitializer
+import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.core.env.MapPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.images.PullPolicy
-import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.utility.DockerImageName
+import java.time.Duration
 import java.util.UUID.randomUUID
 
 
 @TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfiguration {
+class TestcontainersConfiguration : ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private val logger: Logger = LoggerFactory.getLogger(TestcontainersConfiguration::class.java)
+
+    private val mongodbRootPassword = "UJXSeEGJwDhuP1RA9ixz0imj"
+    private val mongoDbUsername = "root"
+    private val mongoDbPort = 27017
+
 
     private val testInstanceId = randomUUID().toString()
     private val network: Network = Network.newNetwork()
 
-    @Container
-    private lateinit var dbContainer: MongoDBContainer
+    private val postgresContainer by lazy { postgresContainer() }
+    private val mongoDBContainer by lazy { mongoDbContainer() }
+    private val kafkaContainer by lazy { kafkaContainer() }
 
-    @Container
-    private lateinit var zookeeper: GenericContainer<*>
+    override fun initialize(applicationContext: ConfigurableApplicationContext) {
 
-    @Container
-    private lateinit var kafkaContainer: GenericContainer<*>
+        val environmentVariables = mapOf(
+            "KAFKA_SERVER_ADDRESS" to kafkaContainer.host,
+            "POSTGRES_DB_NAME" to postgresContainer.databaseName,
+            "POSTGRES_HOST" to postgresContainer.jdbcUrl,
+            "POSTGRES_USERNAME" to postgresContainer.username,
+            "POSTGRES_PASSWORD" to postgresContainer.password,
+            "MONGODB_HOST" to "mongodb://${mongoDBContainer.host}:${mongoDBContainer.getMappedPort(mongoDbPort)}/",
+            "MONGODB_USERNAME" to "root",
+            "MONGODB_PASSWORD" to mongodbRootPassword,
+        )
 
-    @Container
-    private lateinit var postgresContainer: PostgreSQLContainer<*>
+        val environmentPropertySource = MapPropertySource(
+            "testcontainersEnvironment", environmentVariables
+        )
 
-    @PostConstruct
-    private fun kafkaContainer() {
+        applicationContext.environment.propertySources.addFirst(environmentPropertySource)
+    }
+
+    private fun kafkaContainer(): GenericContainer<*> {
         val confluentIncCpZookeeperImage = DockerImageName
             .parse("confluentinc/cp-zookeeper:7.7.1")
 
         val zookeeperContainerName = "$testInstanceId-kafka-zookeeper"
 
-        zookeeper = GenericContainer(confluentIncCpZookeeperImage)
+        val zookeeper = GenericContainer(confluentIncCpZookeeperImage)
             .withImagePullPolicy(PullPolicy.defaultPolicy())
             .withCreateContainerCmdModifier { it.withName(zookeeperContainerName) }
             .withNetwork(network)
@@ -59,7 +77,7 @@ class TestcontainersConfiguration {
         val kafkaContainerName = "$testInstanceId-kafka"
         val listeners = "INSIDE://$kafkaContainerName:9092,OUTSIDE://localhost:$kafkaContainerPort"
 
-        kafkaContainer = GenericContainer(confluentIncCpKafkaImage)
+        val kafkaContainer = GenericContainer(confluentIncCpKafkaImage)
             .withImagePullPolicy(PullPolicy.defaultPolicy())
             .withCreateContainerCmdModifier { it.withName(kafkaContainerName) }
             .withNetwork(network)
@@ -76,39 +94,38 @@ class TestcontainersConfiguration {
         kafkaContainer.portBindings = listOf("$kafkaContainerPort:29092", "$kafkaContainerPortS:9092")
         kafkaContainer.start()
 
-        System.setProperty("KAFKA_SERVER_ADDRESS", kafkaContainer.host)
-
         logger.info("Kafka server started on : http://${kafkaContainer.host}:${kafkaContainerPortS}")
+        return kafkaContainer
     }
 
-    @PostConstruct
-    private fun mongoDbContainer() {
-        val dbPass = "test-password"
-        dbContainer = MongoDBContainer(DockerImageName.parse("mongo:4.0.10"))
-            .withEnv("MONGO_INITDB_ROOT_USERNAME", "root")
-            .withEnv("MONGO_INITDB_ROOT_PASSWORD", dbPass)
-            .withExposedPorts(27017)
-            .withCreateContainerCmdModifier {
-                it.withName("$testInstanceId-mongo")
-            }
+    private fun mongoDbContainer(): GenericContainer<*> {
+        val mongoDBContainer = GenericContainer(DockerImageName.parse("mongo:4.0.10"))
+            .withExposedPorts(mongoDbPort)
+            .withCreateContainerCmdModifier { it.withName("$testInstanceId-mongo") }
+            .withEnv("MONGO_INITDB_ROOT_USERNAME", mongoDbUsername)
+            .withEnv("MONGO_INITDB_ROOT_PASSWORD", mongodbRootPassword)
+            .withEnv("MONGO_INITDB_DATABASE", "kotlin-testing")
+            .withStartupTimeout(Duration.ofMinutes(1))
 
-        dbContainer.start()
+        mongoDBContainer.start()
 
-        System.setProperty("MONGODB_HOST", dbContainer.connectionString)
-        System.setProperty("MONGODB_USERNAME", "root")
-        System.setProperty("MONGODB_PASSWORD", dbPass)
+        logger.info(
+            "MongoDB server started on : mongodb://${mongoDBContainer.host}:${
+                mongoDBContainer.getMappedPort(mongoDbPort)
+            }/"
+        )
+        return mongoDBContainer
     }
 
 
-    @PostConstruct
-    private fun postgresContainer() {
-        postgresContainer = PostgreSQLContainer(DockerImageName.parse("postgres:latest"))
+    private fun postgresContainer(): PostgreSQLContainer<*> {
+        val postgresContainer = PostgreSQLContainer(DockerImageName.parse("postgres:latest"))
             .withNetwork(network)
+            .withDatabaseName("kotlin-testing")
             .withCreateContainerCmdModifier { it.withName("$testInstanceId-postgres") }
 
         postgresContainer.start()
-
-        System.setProperty("POSTGRES_HOST", postgresContainer.jdbcUrl)
+        return postgresContainer
     }
 
     private fun getAContainerPort(): Int {

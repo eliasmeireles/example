@@ -1,4 +1,4 @@
-package com.eliasmeireles.kotlintesting.security
+package com.eliasmeireles.kotlintesting.domain.security
 
 
 import com.github.softwareplace.springboot.security.authorization.AuthorizationHandler

@@ -1,6 +1,6 @@
 package com.eliasmeireles.kotlintesting.it.controller
 
-import com.eliasmeireles.kotlintesting.it.BaseIt
+import com.eliasmeireles.kotlintesting.it.BaseIT
 import com.eliasmeireles.kotlintesting.rest.model.ResponseRest
 import io.restassured.module.kotlin.extensions.Extract
 import io.restassured.module.kotlin.extensions.Given
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 
-class HealthCheckControllerIT : BaseIt() {
+class HealthCheckControllerIT : BaseIT() {
 
     @Test
     fun `must to return expected response by health check endpoint`() {

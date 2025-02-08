@@ -1,6 +1,27 @@
 spring:
   application:
     name: kotlin-testing
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${POSTGRES_HOST}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+
+  flyway:
+    url: ${POSTGRES_HOST}
+    schemas: ${POSTGRES_DB_NAME}
+    user: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    baseline-on-migrate: false
+
   security:
     issuer: kotlin-testing
     encrypt-strength: 10
