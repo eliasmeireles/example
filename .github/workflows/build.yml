@@ -1,0 +1,24 @@
+name: Runner
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  kotlin:
+    name: "Kotlin Testing"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: '21'
+
+      - name: Test
+        id: vars
+        run: cd kotlin-testing && ./gradlew test --info
+
+
