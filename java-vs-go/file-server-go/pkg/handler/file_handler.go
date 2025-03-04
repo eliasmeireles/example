@@ -4,9 +4,12 @@ import (
 	"file-server-go/gen"
 	"file-server-go/pkg/domain/service"
 	"file-server-go/pkg/provider"
+	"fmt"
 	"github.com/labstack/gommon/log"
 	"github.com/softwareplace/http-utils/api_context"
+	"io"
 	"mime/multipart"
+	"path/filepath"
 )
 
 type FileHandler struct {
@@ -14,8 +17,38 @@ type FileHandler struct {
 }
 
 func (r FileHandler) DownloadFileRequest(ctx *api_context.ApiRequestContext[*api_context.DefaultContext]) {
-	//TODO implement me
-	panic("implement me")
+	// Get the filePath from query parameters
+	queryParams := ctx.QueryValues["filePath"]
+	if queryParams == nil || len(queryParams) == 0 {
+		ctx.BadRequest("filePath query parameter is required")
+		return
+	}
+
+	filePath := queryParams[0]
+
+	// Download the file
+	file, err := r.storageService.DownloadFile(filePath)
+	if err != nil {
+		ctx.InternalServerError("Failed to download file: " + err.Error())
+		return
+	}
+	defer func(file multipart.File) {
+		err := file.Close()
+		if err != nil {
+			log.Errorf("Failed to close file: %v", err)
+		}
+	}(file)
+
+	// Set the appropriate headers for the file download
+	(*ctx.Writer).Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filepath.Base(filePath)))
+	(*ctx.Writer).Header().Set("Content-Type", "application/octet-stream")
+
+	// Stream the file to the client
+	_, err = io.Copy(*ctx.Writer, file)
+	if err != nil {
+		ctx.InternalServerError("Failed to stream file: " + err.Error())
+		return
+	}
 }
 
 func (r FileHandler) UploadFileRequest(_ gen.UploadFileMultipartBody, ctx *api_context.ApiRequestContext[*api_context.DefaultContext]) {

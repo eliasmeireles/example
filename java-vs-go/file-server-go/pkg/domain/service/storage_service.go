@@ -95,9 +95,18 @@ func (s _storageServiceImpl) SaveFile(
 	return fileInfo, nil
 }
 
-func (_ _storageServiceImpl) DownloadFile(filePath string) (multipart.File, error) {
-	//TODO implement me
-	panic("implement me")
+func (s _storageServiceImpl) DownloadFile(filePath string) (multipart.File, error) {
+	// Open the file
+	fixPath := strings.TrimPrefix(filePath, "/")
+	path := s.appEnv.StoragePath + "/" + fixPath
+	file, err := os.Open(path)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %v", err)
+	}
+
+	// Return the file as a multipart.File
+	return file, nil
 }
 
 func (s _storageServiceImpl) List(dirPath string) (gen.Data, error) {
