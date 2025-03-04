@@ -3,6 +3,7 @@ package env
 import (
 	"flag"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -13,6 +14,7 @@ type AppEnv struct {
 	StoragePath               string
 	ApiSecretAuthorization    string
 	AuthorizationResourcePath string
+	MaxFileSize               int
 }
 
 var env *AppEnv
@@ -28,6 +30,7 @@ func GetAppEnv() *AppEnv {
 		apiSecretAuthorization := os.Getenv("API_SECRET_AUTHORIZATION")
 		openapiResourcePath := os.Getenv("OPENAPI_RESOURCE_PATH")
 		authorizationResourcePath := os.Getenv("AUTHORIZATION_RESOURCE_PATH")
+
 		port := os.Getenv("PORT")
 
 		if storagePath == "" {
@@ -63,7 +66,30 @@ func GetAppEnv() *AppEnv {
 			StoragePath:               storagePath,
 			ApiSecretAuthorization:    apiSecretAuthorization,
 			AuthorizationResourcePath: authorizationResourcePath,
+			MaxFileSize:               getMaxFileSize(),
 		}
 	}
 	return env
+}
+
+// getMaxFileSize returns the maximum allowed file size in MB.
+// If the MAX_FILE_SIZE environment variable is not set or invalid, it defaults to 120 MB.
+func getMaxFileSize() int {
+	// Get the MAX_FILE_SIZE environment variable
+	maxFileSizeStr := os.Getenv("MAX_FILE_SIZE")
+
+	// If the environment variable is not set, return the default value (120 MB)
+	if maxFileSizeStr == "" {
+		return 120
+	}
+
+	// Try to parse the environment variable as an integer
+	maxFileSize, err := strconv.Atoi(maxFileSizeStr)
+	if err != nil || maxFileSize <= 0 {
+		// If parsing fails or the value is invalid, return the default value (120 MB)
+		return 120
+	}
+
+	// Return the parsed value
+	return maxFileSize
 }

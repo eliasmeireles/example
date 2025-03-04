@@ -12,4 +12,5 @@ var (
 	PrincipalService = appsecurity.GetPrincipalService()
 	SecurityService  = security.ApiSecurityServiceBuild(AppEnv.ApiSecretAuthorization, PrincipalService)
 	UserService      = service.GetLoginService(SecurityService)
+	StorageService   = service.GetStorageService()
 )

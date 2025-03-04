@@ -22,13 +22,24 @@ var (
 func getResourceHandler() gen.ServiceRequestHandler[*api_context.DefaultContext] {
 	once.Do(func() {
 		instance = resourceHandler{
-			AuthorizationHandler: AuthorizationHandler{
-				loginService: provider.UserService,
-			},
+			AuthorizationHandler: authorizationHandler(),
+			FileHandler:          fileHandler(),
 		}
 	})
 
 	return instance
+}
+
+func authorizationHandler() AuthorizationHandler {
+	return AuthorizationHandler{
+		loginService: provider.UserService,
+	}
+}
+
+func fileHandler() FileHandler {
+	return FileHandler{
+		storageService: provider.StorageService,
+	}
 }
 
 func EmbeddedServer(
