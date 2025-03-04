@@ -40,7 +40,8 @@ func (r FileHandler) DownloadFileRequest(ctx *api_context.ApiRequestContext[*api
 	}(file)
 
 	// Set the appropriate headers for the file download
-	(*ctx.Writer).Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filepath.Base(filePath)))
+	fileBase := filepath.Base(filePath)
+	(*ctx.Writer).Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileBase))
 	(*ctx.Writer).Header().Set("Content-Type", "application/octet-stream")
 
 	// Stream the file to the client
