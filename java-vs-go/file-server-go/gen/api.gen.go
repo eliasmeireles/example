@@ -55,6 +55,12 @@ type AuthorizationGenParams struct {
 	Authorization AccessToken `json:"Authorization"`
 }
 
+// ListParams defines parameters for List.
+type ListParams struct {
+	Resource      *string     `form:"resource,omitempty" json:"resource,omitempty"`
+	Authorization AccessToken `json:"Authorization"`
+}
+
 // DownloadFileParams defines parameters for DownloadFile.
 type DownloadFileParams struct {
 	FilePath string `form:"filePath" json:"filePath"`
@@ -69,12 +75,6 @@ type UploadFileMultipartBody struct {
 
 // UploadFileParams defines parameters for UploadFile.
 type UploadFileParams struct {
-	Authorization AccessToken `json:"Authorization"`
-}
-
-// ListParams defines parameters for List.
-type ListParams struct {
-	Resource      *string     `form:"resource,omitempty" json:"resource,omitempty"`
 	Authorization AccessToken `json:"Authorization"`
 }
 
@@ -100,6 +100,14 @@ func (rh *requestHandlerImpl[T]) AuthorizationGen(ctx *api_context.ApiRequestCon
 
 }
 
+func (rh *requestHandlerImpl[T]) List(ctx *api_context.ApiRequestContext[T]) {
+
+	//request := ListRequestParams{}
+	// server.PopulateFieldsFromRequest(ctx, &request)
+	rh.Service.ListRequest(ctx)
+
+}
+
 func (rh *requestHandlerImpl[T]) DownloadFile(ctx *api_context.ApiRequestContext[T]) {
 
 	//request := DownloadFileRequestParams{}
@@ -116,14 +124,6 @@ func (rh *requestHandlerImpl[T]) UploadFile(ctx *api_context.ApiRequestContext[T
 	}, func(ctx *api_context.ApiRequestContext[T], err error) {
 		ctx.InternalServerError("Internal server error")
 	})
-
-}
-
-func (rh *requestHandlerImpl[T]) List(ctx *api_context.ApiRequestContext[T]) {
-
-	//request := ListRequestParams{}
-	// server.PopulateFieldsFromRequest(ctx, &request)
-	rh.Service.ListRequest(ctx)
 
 }
 
@@ -152,15 +152,15 @@ type RequestHandler[T api_context.ApiPrincipalContext] interface {
 	// Return a user authorization data that can be used to access the api
 	// (POST /authorization/gen)
 	AuthorizationGen(ctx *api_context.ApiRequestContext[T])
-	// Download a file by name
-	// (GET /file/download)
-	DownloadFile(ctx *api_context.ApiRequestContext[T])
-	// Upload a single file
-	// (POST /file/upload)
-	UploadFile(ctx *api_context.ApiRequestContext[T])
 	// List available files from storage path
 	// (GET /files)
 	List(ctx *api_context.ApiRequestContext[T])
+	// Download a file by name
+	// (GET /files/download)
+	DownloadFile(ctx *api_context.ApiRequestContext[T])
+	// Upload a single file
+	// (POST /files/upload)
+	UploadFile(ctx *api_context.ApiRequestContext[T])
 	// Check application status
 	// (GET /health)
 	HealthGet(ctx *api_context.ApiRequestContext[T])
@@ -174,12 +174,12 @@ type ServiceRequestHandler[T api_context.ApiPrincipalContext] interface {
 	// AuthorizationGenRequest(requestBody UserInfo, requestParams AuthorizationGenRequestParams, ctx *api_context.ApiRequestContext[T])
 	AuthorizationGenRequest(requestBody UserInfo, ctx *api_context.ApiRequestContext[T])
 
+	ListRequest(ctx *api_context.ApiRequestContext[T])
+
 	DownloadFileRequest(ctx *api_context.ApiRequestContext[T])
 
 	// UploadFileRequest(requestBody UploadFileMultipartBody, requestParams UploadFileRequestParams, ctx *api_context.ApiRequestContext[T])
 	UploadFileRequest(requestBody UploadFileMultipartBody, ctx *api_context.ApiRequestContext[T])
-
-	ListRequest(ctx *api_context.ApiRequestContext[T])
 
 	HealthGetRequest(ctx *api_context.ApiRequestContext[T])
 }
@@ -192,9 +192,9 @@ type requestHandlerImpl[T api_context.ApiPrincipalContext] struct {
 
 // - RequestHandler.GetAuthorization
 // - RequestHandler.AuthorizationGen
+// - RequestHandler.List
 // - RequestHandler.DownloadFile
 // - RequestHandler.UploadFile
-// - RequestHandler.List
 // - RequestHandler.HealthGet
 // Parameters:
 //   - apiServer: The API router handler used for setting up routes and middleware.
@@ -234,13 +234,13 @@ func ApiResourceRegister[T api_context.ApiPrincipalContext](apiServer server.Api
 	apiServer.PublicRouter(handler.AuthorizationGen, "/authorization/gen", "POST")
 
 	// Initialize an empty string for the merged scopes.
-	apiServer.PublicRouter(handler.DownloadFile, "/file/download", "GET")
-
-	// Initialize an empty string for the merged scopes.
-	apiServer.PublicRouter(handler.UploadFile, "/file/upload", "POST")
-
-	// Initialize an empty string for the merged scopes.
 	apiServer.PublicRouter(handler.List, "/files", "GET")
+
+	// Initialize an empty string for the merged scopes.
+	apiServer.PublicRouter(handler.DownloadFile, "/files/download", "GET")
+
+	// Initialize an empty string for the merged scopes.
+	apiServer.PublicRouter(handler.UploadFile, "/files/upload", "POST")
 
 	// Initialize an empty string for the merged scopes.
 	apiServer.PublicRouter(handler.HealthGet, "/health", "GET")

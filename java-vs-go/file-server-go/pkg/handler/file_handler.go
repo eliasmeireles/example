@@ -58,6 +58,19 @@ func (r FileHandler) UploadFileRequest(_ gen.UploadFileMultipartBody, ctx *api_c
 }
 
 func (r FileHandler) ListRequest(ctx *api_context.ApiRequestContext[*api_context.DefaultContext]) {
-	//TODO implement me
-	panic("implement me")
+	queryParams := ctx.QueryValues["resource"]
+
+	dirName := "/"
+
+	if queryParams != nil {
+		dirName = queryParams[0]
+	}
+
+	list, err := r.storageService.List(dirName)
+
+	if err != nil {
+		ctx.InternalServerError("Failed to list files: " + err.Error())
+		return
+	}
+	ctx.Ok(list)
 }

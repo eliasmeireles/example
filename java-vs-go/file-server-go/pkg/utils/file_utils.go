@@ -59,3 +59,31 @@ func NormalizeFileName(basePath string, dirName string, fileName string, fileExt
 
 	return fullPath, nil
 }
+
+// ListFilesRecursively lists all files and directories recursively.
+func ListFilesRecursively(dirPath string, paths *[]string, onFindPath func(filePath string) string) error {
+	// Read the directory
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return fmt.Errorf("failed to read directory %s: %v", dirPath, err)
+	}
+
+	// Iterate over the directory entries
+	for _, entry := range entries {
+		// Get the full path of the entry
+		fullPath := filepath.Join(dirPath, entry.Name())
+
+		// If the entry is a directory, recursively list its contents
+		if entry.IsDir() {
+			err := ListFilesRecursively(fullPath, paths, onFindPath)
+			if err != nil {
+				return err
+			}
+		} else {
+			// Append the path to the slice
+			*paths = append(*paths, onFindPath(fullPath))
+		}
+	}
+
+	return nil
+}

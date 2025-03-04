@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"file-server-go/gen"
 	"file-server-go/pkg/env"
 	"file-server-go/pkg/utils"
@@ -9,6 +10,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -24,9 +26,24 @@ type StorageService interface {
 }
 
 type _storageServiceImpl struct {
+	appEnv env.AppEnv
 }
 
-func (_ _storageServiceImpl) SaveFile(
+var (
+	storageServiceOnce     sync.Once
+	storageServiceInstance StorageService
+)
+
+func GetStorageService() StorageService {
+	storageServiceOnce.Do(func() {
+		storageServiceInstance = &_storageServiceImpl{
+			appEnv: *env.GetAppEnv(),
+		}
+	})
+	return storageServiceInstance
+}
+
+func (s _storageServiceImpl) SaveFile(
 	file multipart.File,
 	fileHeader *multipart.FileHeader,
 	dirName string,
@@ -39,9 +56,7 @@ func (_ _storageServiceImpl) SaveFile(
 
 	fileExtension := utils.GetFileExtension(fileHeader)
 
-	appEnv := env.GetAppEnv()
-
-	filePath, err := utils.NormalizeFileName(appEnv.StoragePath, dirName, fileName, fileExtension)
+	filePath, err := utils.NormalizeFileName(s.appEnv.StoragePath, dirName, fileName, fileExtension)
 
 	if err != nil {
 		return nil, err
@@ -66,12 +81,12 @@ func (_ _storageServiceImpl) SaveFile(
 		return nil, err
 	}
 
-	fullFileName := fmt.Sprintf("%s/%s./%s", dirName, fileName, fileExtension)
+	fullFileName := fmt.Sprintf("%s/%s%s", dirName, fileName, fileExtension)
 
 	// Generate file metadata for the response
 	fileInfo := map[string]interface{}{
 		"fileName":        fileName,
-		"fileDownloadUri": fmt.Sprintf("file/download/%s", fullFileName),
+		"fileDownloadUri": fmt.Sprintf("/files/download?filePath=%s", fullFileName),
 		"contentType":     fileExtension,
 		"size":            utils.GetFileSize(fileHeader),
 		"extension":       fileExtension,
@@ -80,24 +95,43 @@ func (_ _storageServiceImpl) SaveFile(
 	return fileInfo, nil
 }
 
-var (
-	storageServiceOnce     sync.Once
-	storageServiceInstance StorageService
-)
-
-func GetStorageService() StorageService {
-	storageServiceOnce.Do(func() {
-		storageServiceInstance = &_storageServiceImpl{}
-	})
-	return storageServiceInstance
-}
-
 func (_ _storageServiceImpl) DownloadFile(filePath string) (multipart.File, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (_ _storageServiceImpl) List(dirPath string) (gen.Data, error) {
-	//TODO implement me
-	panic("implement me")
+func (s _storageServiceImpl) List(dirPath string) (gen.Data, error) {
+	// Read the directory
+	fixPath := strings.TrimPrefix(dirPath, "/")
+	fixPath = strings.TrimSuffix(fixPath, "./")
+
+	path := s.appEnv.StoragePath + "/" + fixPath
+
+	// Prepare a slice to hold the file paths
+	var paths []string
+
+	// Recursively list files and directories
+	err := utils.ListFilesRecursively(path, &paths, func(filePath string) string {
+		cleanPath := strings.TrimPrefix(filePath, s.appEnv.StoragePath)
+		return "/files/download?filePath=" + cleanPath
+	})
+
+	if err != nil {
+		return gen.Data{}, fmt.Errorf("failed to list files recursively: %v", err)
+	}
+
+	// Convert the slice to a JSON-compatible interface{}
+	var pathInterface interface{}
+	pathsJSON, err := json.Marshal(paths)
+	if err != nil {
+		return gen.Data{}, fmt.Errorf("failed to marshal paths to JSON: %v", err)
+	}
+	if err := json.Unmarshal(pathsJSON, &pathInterface); err != nil {
+		return gen.Data{}, fmt.Errorf("failed to unmarshal paths to interface{}: %v", err)
+	}
+
+	// Return the result as gen.Data
+	return gen.Data{
+		Path: &pathInterface,
+	}, nil
 }
