@@ -16,7 +16,9 @@ type FileHandler struct {
 	storageService service.StorageService
 }
 
-func (r FileHandler) DownloadFileRequest(ctx *api_context.ApiRequestContext[*api_context.DefaultContext]) {
+func (r FileHandler) DownloadFileRequest(
+	ctx *api_context.ApiRequestContext[*api_context.DefaultContext],
+) {
 	// Get the filePath from query parameters
 	queryParams := ctx.QueryValues["filePath"]
 	if queryParams == nil || len(queryParams) == 0 {
@@ -52,7 +54,10 @@ func (r FileHandler) DownloadFileRequest(ctx *api_context.ApiRequestContext[*api
 	}
 }
 
-func (r FileHandler) UploadFileRequest(_ gen.UploadFileMultipartBody, ctx *api_context.ApiRequestContext[*api_context.DefaultContext]) {
+func (r FileHandler) UploadFileRequest(
+	_ gen.UploadFileMultipartBody,
+	ctx *api_context.ApiRequestContext[*api_context.DefaultContext],
+) {
 	// Parse the multipart form
 	err := ctx.Request.ParseMultipartForm(10 << provider.AppEnv.MaxFileSize)
 	if err != nil {
