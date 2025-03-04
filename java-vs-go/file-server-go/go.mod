@@ -4,7 +4,7 @@ go 1.23.4
 
 require (
 	github.com/oapi-codegen/runtime v1.1.1
-	github.com/softwareplace/http-utils v0.0.0-20250304180518-3877534ba93b
+	github.com/softwareplace/http-utils v0.0.0-20250304194924-7bc6a32c2e18
 )
 
 require (

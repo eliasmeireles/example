@@ -44,6 +44,8 @@ github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
 github.com/softwareplace/http-utils v0.0.0-20250304180518-3877534ba93b h1:I1ftljoRAu7YtGSrS3+SjgC0Yc6V+/Xth/1KDpq3FVA=
 github.com/softwareplace/http-utils v0.0.0-20250304180518-3877534ba93b/go.mod h1:HpCpWhDdYQEpx2hnWxbxJFmlK3BhtTtLo6k1zU+869Y=
+github.com/softwareplace/http-utils v0.0.0-20250304194924-7bc6a32c2e18 h1:De7yO6VOqV4HVzkmbA8jS5Jv1VoKJwnCYP/zYRId9M0=
+github.com/softwareplace/http-utils v0.0.0-20250304194924-7bc6a32c2e18/go.mod h1:HpCpWhDdYQEpx2hnWxbxJFmlK3BhtTtLo6k1zU+869Y=
 github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOfJA=
 github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/swaggo/files v1.0.1 h1:J1bVJ4XHZNq0I46UU90611i9/YzdrF7x92oX1ig5IdE=
