@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"fmt"
 	"mime/multipart"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -32,7 +34,8 @@ func GetFileSize(fileHeader *multipart.FileHeader) int64 {
 
 // NormalizeFileName normalizes the file name by removing slashes and whitespace,
 // appending the file extension, and combining it with the directory name.
-func NormalizeFileName(dirName, fileName string, fileExtension string) string {
+// It also ensures the full directory path exists.
+func NormalizeFileName(basePath string, dirName string, fileName string, fileExtension string) (string, error) {
 	// Remove slashes from the file name
 	normalizedFileName := strings.ReplaceAll(fileName, "/", "")
 
@@ -45,6 +48,14 @@ func NormalizeFileName(dirName, fileName string, fileExtension string) string {
 		normalizedFileName += fileExtension
 	}
 
-	// Combine the directory name and normalized file name
-	return filepath.Join(dirName, normalizedFileName)
+	// Combine the base path, directory name, and normalized file name
+	fullPath := filepath.Join(basePath, dirName, normalizedFileName)
+
+	// Ensure the full directory path exists
+	dirPath := filepath.Dir(fullPath)
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		return "", fmt.Errorf("failed to create directory: %v", err)
+	}
+
+	return fullPath, nil
 }

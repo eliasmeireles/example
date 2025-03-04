@@ -35,6 +35,8 @@ func GetAppEnv() *AppEnv {
 
 		if storagePath == "" {
 			storagePath = os.Getenv("HOME") + "/file-server/go/"
+		} else if strings.HasPrefix(storagePath, "~") {
+			storagePath = strings.Replace(storagePath, "~", os.Getenv("HOME"), 1)
 		}
 
 		if authorizationResourcePath == "" {

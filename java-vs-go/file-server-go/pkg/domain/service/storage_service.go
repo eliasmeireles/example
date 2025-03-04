@@ -41,11 +41,18 @@ func (_ _storageServiceImpl) SaveFile(
 
 	appEnv := env.GetAppEnv()
 
-	filePath := utils.NormalizeFileName(appEnv.StoragePath, dirName+fileName, fileExtension)
-	outFile, err := os.Create(filePath)
+	filePath, err := utils.NormalizeFileName(appEnv.StoragePath, dirName, fileName, fileExtension)
+
 	if err != nil {
 		return nil, err
 	}
+
+	outFile, err := os.Create(filePath)
+
+	if err != nil {
+		return nil, err
+	}
+
 	defer func(outFile *os.File) {
 		err := outFile.Close()
 		if err != nil {
