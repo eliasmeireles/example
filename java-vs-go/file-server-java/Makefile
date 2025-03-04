@@ -19,6 +19,9 @@ clean:
 	./gradlew clean
 
 
+local-down:
+	@docker-compose -p filer-server-java down
+
 local-deployment:
 	@docker-compose -p filer-server-java up --build -d
 
