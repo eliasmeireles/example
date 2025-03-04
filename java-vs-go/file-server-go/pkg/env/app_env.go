@@ -47,7 +47,7 @@ func GetAppEnv() *AppEnv {
 		}
 
 		if contextPath == "" {
-			contextPath = "/app/file-server/v1/"
+			contextPath = "/api/file-server/v1/"
 		}
 
 		if port == "" {
