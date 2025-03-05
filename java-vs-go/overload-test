@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# Define default values
+COUNT=1
+WORK_DIR=$(pwd)
+USERNAME="file-server@user.com"
+PASSWORD="123456"
+
+# Variables to store total time for each server
+total_time_java=0
+total_time_go=0
+
+# Function to make a request and measure time
+function request() {
+  local port=$1
+  local i=$2
+
+  echo "Request $i/$COUNT to port $port:"
+
+  # Measure the time taken for the authorization request
+  local auth_start_time=$(date +%s%N)
+  local auth_response=$(curl -s --location "http://localhost:$port/api/file-server/v1/authorization" \
+    --header 'Content-Type: application/json' \
+    --data-raw "{
+      \"username\": \"$USERNAME\",
+      \"password\": \"$PASSWORD\"
+    }")
+  local auth_end_time=$(date +%s%N)
+  local auth_time=$(( (auth_end_time - auth_start_time) / 1000000 )) # Convert to milliseconds
+
+  # Extract the JWT token from the response
+  local jwt_token=$(echo $auth_response | jq -r '.jwt')
+
+  if [ -z "$jwt_token" ] || [ "$jwt_token" == "null" ]; then
+    echo "Failed to get JWT token for port $port"
+    return
+  fi
+
+  echo "JWT Token for port $port: $jwt_token"
+
+  # Measure the time taken for the file upload request
+  local upload_start_time=$(date +%s%N)
+  curl --location "http://localhost:$port/api/file-server/v1/files/upload" \
+    --header "Authorization: $jwt_token" \
+    --form "resource=@\"$WORK_DIR/large-63mb.pdf\"" \
+    --form 'fileName="large-file"' \
+    --form 'dirName="overload-test"'
+  local upload_end_time=$(date +%s%N)
+  local upload_time=$(( (upload_end_time - upload_start_time) / 1000000 )) # Convert to milliseconds
+
+  local total_time=$((auth_time + upload_time))
+
+  echo "Authorization time for port $port: ${auth_time}ms"
+  echo "Upload time for port $port: ${upload_time}ms"
+  echo -e "Total time for port $port: ${total_time}ms\n-----\n"
+
+  # Accumulate total time for the respective server
+  if [ "$port" -eq 8080 ]; then
+    total_time_java=$((total_time_java + total_time))
+  elif [ "$port" -eq 8081 ]; then
+    total_time_go=$((total_time_go + total_time))
+  fi
+}
+
+# Parse arguments
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    --count) COUNT=$2; shift ;;
+    *) echo "Unknown parameter passed: $1"; exit 1 ;;
+  esac
+  shift
+done
+
+# Arrays to store PIDs for parallel requests
+pids=()
+
+# Make requests in parallel to both ports
+for ((i=1; i<=COUNT; i++)); do
+  echo "Benchmarking request $i/$COUNT:"
+  request 8080 $i & # Java Spring Boot (run in background)
+  pids+=($!)       # Store PID of the background process
+  request 8081 $i & # Go (run in background)
+  pids+=($!)       # Store PID of the background process
+done
+
+# Wait for all background processes to complete
+for pid in "${pids[@]}"; do
+  wait "$pid"
+done
+
+# Calculate average time for each server
+average_time_java=$(echo "scale=2; $total_time_java / $COUNT" | bc)
+average_time_go=$(echo "scale=2; $total_time_go / $COUNT" | bc)
+
+# Log benchmark results
+echo "Benchmark Results:"
+echo "Java Spring Boot (port 8080):"
+echo "  Total time for $COUNT requests: ${total_time_java}ms"
+echo "  Average time per request: ${average_time_java}ms"
+echo "Go (port 8081):"
+echo "  Total time for $COUNT requests: ${total_time_go}ms"
+echo "  Average time per request: ${average_time_go}ms"
+
+echo "Benchmarking completed."
