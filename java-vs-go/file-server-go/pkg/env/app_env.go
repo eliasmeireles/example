@@ -1,6 +1,7 @@
 package env
 
 import (
+	"file-server-go/pkg/utils"
 	"flag"
 	"os"
 	"strconv"
@@ -60,6 +61,13 @@ func GetAppEnv() *AppEnv {
 		}
 
 		flag.Parse()
+		storagePath = strings.TrimSuffix(storagePath, "/")
+
+		_, err := utils.CreatDirs(storagePath)
+
+		if err != nil {
+			panic(err)
+		}
 
 		env = &AppEnv{
 			Port:                      port,

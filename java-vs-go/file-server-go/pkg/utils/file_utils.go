@@ -53,11 +53,19 @@ func NormalizeFileName(basePath string, dirName string, fileName string, fileExt
 
 	// Ensure the full directory path exists
 	dirPath := filepath.Dir(fullPath)
-	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
-		return "", fmt.Errorf("failed to create directory: %v", err)
+	s, err := CreatDirs(dirPath)
+	if err != nil {
+		return s, err
 	}
 
 	return fullPath, nil
+}
+
+func CreatDirs(dirPath string) (string, error) {
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		return "", fmt.Errorf("failed to create directory: %v", err)
+	}
+	return "", nil
 }
 
 // ListFilesRecursively lists all files and directories recursively.
