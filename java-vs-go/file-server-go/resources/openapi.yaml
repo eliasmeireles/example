@@ -205,7 +205,7 @@ components:
     Data:
       type: object
       properties:
-        path:
+        paths:
           items:
             type: string
     UploadFileResponse:

@@ -14,7 +14,7 @@ type Authorization = Response
 
 // Data defines model for Data.
 type Data struct {
-	Path *interface{} `json:"path,omitempty"`
+	Paths *interface{} `json:"paths,omitempty"`
 }
 
 // Response defines model for Response.

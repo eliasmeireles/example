@@ -145,6 +145,6 @@ func (s _storageServiceImpl) List(dirPath string) (gen.Data, error) {
 
 	// Return the result as gen.Data
 	return gen.Data{
-		Path: &pathInterface,
+		Paths: &pathInterface,
 	}, nil
 }
