@@ -118,13 +118,18 @@ func (r FileHandler) ListRequest(ctx *api_context.ApiRequestContext[*api_context
 func (r FileHandler) DeleteRequest(ctx *api_context.ApiRequestContext[*api_context.DefaultContext]) {
 	queryParams := ctx.QueryValues["resource"]
 
-	dirName := "/"
+	resource := ""
 
 	if queryParams != nil {
-		dirName = queryParams[0]
+		resource = queryParams[0]
 	}
 
-	err := r.storageService.Delete(dirName)
+	if len(resource) == 0 {
+		ctx.BadRequest("resource is required")
+		return
+	}
+
+	err := r.storageService.Delete(resource)
 	if err != nil {
 		ctx.InternalServerError("Failed to delete files: " + err.Error())
 		return
@@ -137,7 +142,7 @@ func (r FileHandler) DeleteRequest(ctx *api_context.ApiRequestContext[*api_conte
 	response := map[string]interface{}{
 		"code":      200,
 		"success":   true,
-		"message":   "File deleted successfully.",
+		"message":   " deleted successfully.",
 		"timestamp": timestamp,
 	}
 
