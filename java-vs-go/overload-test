@@ -42,7 +42,7 @@ function request() {
   local auth_time=$(( (auth_end_time - auth_start_time) / 1000000 )) # Convert to milliseconds
 
   # Extract the JWT token from the response
-  local jwt_token=$(echo $auth_response | jq -r '.jwt')
+  local jwt_token=$(echo "$auth_response" | jq -r '.jwt')
 
   if [ -z "$jwt_token" ] || [ "$jwt_token" == "null" ]; then
     echo -e "${RED}Failed to get JWT token for port $port${NC}"
@@ -57,8 +57,6 @@ function request() {
     fi
     return
   fi
-
-  echo -e "${GREEN}JWT Token for port $port: $jwt_token${NC}"
 
   # Measure the time taken for the file upload request
   local upload_start_time=$(date +%s%N)
@@ -139,13 +137,13 @@ average_time_go=$(echo "scale=2; $total_time_go / $COUNT" | bc)
 # Log benchmark results
 echo -e "${CYAN}Benchmark Results:${NC}"
 echo -e "${YELLOW}Java Spring Boot (port 8080):${NC}"
-echo -e "  Total time for $COUNT requests: ${total_time_java}ms"
-echo -e "  Average time per request: ${average_time_java}ms"
+echo -e "  ${CYAN}Total time for $COUNT requests: ${total_time_java}ms${NC}"
+echo -e "  ${CYAN}Average time per request: ${average_time_java}ms${NC}"
 echo -e "  ${GREEN}Successful requests: ${success_java}${NC}"
 echo -e "  ${RED}Failed requests: ${error_java}${NC}"
 echo -e "${YELLOW}Go (port 8081):${NC}"
-echo -e "  Total time for $COUNT requests: ${total_time_go}ms"
-echo -e "  Average time per request: ${average_time_go}ms"
+echo -e "  ${CYAN}Total time for $COUNT requests: ${total_time_go}ms"
+echo -e "  ${CYAN}Average time per request: ${average_time_go}ms"
 echo -e "  ${GREEN}Successful requests: ${success_go}${NC}"
 echo -e "  ${RED}Failed requests: ${error_go}${NC}"
 
