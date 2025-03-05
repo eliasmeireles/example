@@ -23,6 +23,21 @@ TMP_FILE_GO=$(mktemp)
 echo "0 0 0" > "$TMP_FILE_JAVA" # total_time, success, error
 echo "0 0 0" > "$TMP_FILE_GO"   # total_time, success, error
 
+# Function to update counters with file locking
+function update_counter() {
+  local tmp_file=$1
+  local total_time=$2
+  local success=$3
+  local error=$4
+
+  # Use file locking to prevent race conditions
+  (
+    flock -x 200
+    read -r current_total_time current_success current_error < "$tmp_file"
+    echo "$((current_total_time + total_time)) $((current_success + success)) $((current_error + error))" > "$tmp_file"
+  ) 200>"$tmp_file.lock"
+}
+
 # Function to make a request and measure time
 function request() {
   local port=$1
@@ -47,13 +62,9 @@ function request() {
   if [ -z "$jwt_token" ] || [ "$jwt_token" == "null" ]; then
     echo -e "${RED}Failed to get JWT token for port $port${NC}"
     if [ "$port" -eq 8080 ]; then
-      # Increment error counter for Java
-      read -r total_time success error < "$TMP_FILE_JAVA"
-      echo "$total_time $success $((error + 1))" > "$TMP_FILE_JAVA"
+      update_counter "$TMP_FILE_JAVA" 0 0 1
     elif [ "$port" -eq 8081 ]; then
-      # Increment error counter for Go
-      read -r total_time success error < "$TMP_FILE_GO"
-      echo "$total_time $success $((error + 1))" > "$TMP_FILE_GO"
+      update_counter "$TMP_FILE_GO" 0 0 1
     fi
     return
   fi
@@ -74,24 +85,16 @@ function request() {
   if echo "$upload_response" | jq -e '.fileDownloadUri' > /dev/null 2>&1; then
     echo -e "${GREEN}Upload successful for port $port${NC}"
     if [ "$port" -eq 8080 ]; then
-      # Increment success counter for Java
-      read -r total_time_java success_java error_java < "$TMP_FILE_JAVA"
-      echo "$((total_time_java + total_time)) $((success_java + 1)) $error_java" > "$TMP_FILE_JAVA"
+      update_counter "$TMP_FILE_JAVA" "$total_time" 1 0
     elif [ "$port" -eq 8081 ]; then
-      # Increment success counter for Go
-      read -r total_time_go success_go error_go < "$TMP_FILE_GO"
-      echo "$((total_time_go + total_time)) $((success_go + 1)) $error_go" > "$TMP_FILE_GO"
+      update_counter "$TMP_FILE_GO" "$total_time" 1 0
     fi
   else
     echo -e "${RED}Upload failed for port $port${NC}"
     if [ "$port" -eq 8080 ]; then
-      # Increment error counter for Java
-      read -r total_time_java success_java error_java < "$TMP_FILE_JAVA"
-      echo "$((total_time_java + total_time)) $success_java $((error_java + 1))" > "$TMP_FILE_JAVA"
+      update_counter "$TMP_FILE_JAVA" "$total_time" 0 1
     elif [ "$port" -eq 8081 ]; then
-      # Increment error counter for Go
-      read -r total_time_go success_go error_go < "$TMP_FILE_GO"
-      echo "$((total_time_go + total_time)) $success_go $((error_go + 1))" > "$TMP_FILE_GO"
+      update_counter "$TMP_FILE_GO" "$total_time" 0 1
     fi
   fi
 
@@ -148,6 +151,6 @@ echo -e "  ${GREEN}Successful requests: ${success_go}${NC}"
 echo -e "  ${RED}Failed requests: ${error_go}${NC}"
 
 # Clean up temporary files
-rm -f "$TMP_FILE_JAVA" "$TMP_FILE_GO"
+rm -f "$TMP_FILE_JAVA" "$TMP_FILE_GO" "$TMP_FILE_JAVA.lock" "$TMP_FILE_GO.lock"
 
 echo -e "${GREEN}Benchmarking completed.${NC}"
