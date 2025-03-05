@@ -55,6 +55,11 @@ type AuthorizationGenParams struct {
 	Authorization AccessToken `json:"Authorization"`
 }
 
+// DeleteParams defines parameters for Delete.
+type DeleteParams struct {
+	FilePath string `form:"filePath" json:"filePath"`
+}
+
 // ListParams defines parameters for List.
 type ListParams struct {
 	Resource      *string     `form:"resource,omitempty" json:"resource,omitempty"`
@@ -97,6 +102,14 @@ func (rh *requestHandlerImpl[T]) AuthorizationGen(ctx *api_context.ApiRequestCon
 	}, func(ctx *api_context.ApiRequestContext[T], err error) {
 		ctx.InternalServerError("Internal server error")
 	})
+
+}
+
+func (rh *requestHandlerImpl[T]) Delete(ctx *api_context.ApiRequestContext[T]) {
+
+	//request := DeleteRequestParams{}
+	// server.PopulateFieldsFromRequest(ctx, &request)
+	rh.Service.DeleteRequest(ctx)
 
 }
 
@@ -152,6 +165,9 @@ type RequestHandler[T api_context.ApiPrincipalContext] interface {
 	// Return a user authorization data that can be used to access the api
 	// (POST /authorization/gen)
 	AuthorizationGen(ctx *api_context.ApiRequestContext[T])
+	// Delete a file or dir by name
+	// (DELETE /files)
+	Delete(ctx *api_context.ApiRequestContext[T])
 	// List available files from storage path
 	// (GET /files)
 	List(ctx *api_context.ApiRequestContext[T])
@@ -174,6 +190,8 @@ type ServiceRequestHandler[T api_context.ApiPrincipalContext] interface {
 	// AuthorizationGenRequest(requestBody UserInfo, requestParams AuthorizationGenRequestParams, ctx *api_context.ApiRequestContext[T])
 	AuthorizationGenRequest(requestBody UserInfo, ctx *api_context.ApiRequestContext[T])
 
+	DeleteRequest(ctx *api_context.ApiRequestContext[T])
+
 	ListRequest(ctx *api_context.ApiRequestContext[T])
 
 	DownloadFileRequest(ctx *api_context.ApiRequestContext[T])
@@ -192,6 +210,7 @@ type requestHandlerImpl[T api_context.ApiPrincipalContext] struct {
 
 // - RequestHandler.GetAuthorization
 // - RequestHandler.AuthorizationGen
+// - RequestHandler.Delete
 // - RequestHandler.List
 // - RequestHandler.DownloadFile
 // - RequestHandler.UploadFile
@@ -232,6 +251,9 @@ func ApiResourceRegister[T api_context.ApiPrincipalContext](apiServer server.Api
 
 	// Initialize an empty string for the merged scopes.
 	apiServer.PublicRouter(handler.AuthorizationGen, "/authorization/gen", "POST")
+
+	// Initialize an empty string for the merged scopes.
+	apiServer.PublicRouter(handler.Delete, "/files", "DELETE")
 
 	// Initialize an empty string for the merged scopes.
 	apiServer.PublicRouter(handler.List, "/files", "GET")

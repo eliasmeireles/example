@@ -10,6 +10,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 )
@@ -23,6 +24,7 @@ type StorageService interface {
 	) (map[string]interface{}, error)
 	DownloadFile(filePath string) (multipart.File, error)
 	List(dirPath string) (gen.Data, error)
+	Delete(name string) error
 }
 
 type _storageServiceImpl struct {
@@ -147,4 +149,43 @@ func (s _storageServiceImpl) List(dirPath string) (gen.Data, error) {
 	return gen.Data{
 		Paths: &pathInterface,
 	}, nil
+}
+
+func (s _storageServiceImpl) Delete(dirPath string) error {
+	// Normalize the directory path
+	fixPath := strings.TrimPrefix(dirPath, "/")
+	fixPath = strings.TrimSuffix(fixPath, "./")
+	fullPath := filepath.Join(s.appEnv.StoragePath, fixPath)
+
+	// Ensure the path is within the base storage path
+	absPath, err := filepath.Abs(fullPath)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path: %v", err)
+	}
+
+	basePath, err := filepath.Abs(s.appEnv.StoragePath)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute base path: %v", err)
+	}
+
+	if !strings.HasPrefix(absPath, basePath) {
+		return fmt.Errorf("illegal operation: path is outside the base storage path")
+	}
+
+	if fullPath == filepath.Join(s.appEnv.StoragePath) {
+		return fmt.Errorf("illegal operation: can't delete the base storage path")
+	}
+
+	// Check if the path exists
+	if _, err := os.Stat(absPath); os.IsNotExist(err) {
+		return nil // Path does not exist, nothing to delete
+	}
+
+	// Delete the file or directory
+	err = os.RemoveAll(absPath)
+	if err != nil {
+		return fmt.Errorf("failed to delete path: %v", err)
+	}
+
+	return nil
 }

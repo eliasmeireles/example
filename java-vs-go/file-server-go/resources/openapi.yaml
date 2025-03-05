@@ -163,6 +163,31 @@ paths:
                 $ref: "#/components/schemas/Response"
 
   /files:
+    delete:
+      tags:
+        - File
+      summary: Delete a file or dir by name
+      operationId: delete
+      parameters:
+        - name: filePath
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        '500':
+          description: Error in request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
     get:
       tags:
         - File

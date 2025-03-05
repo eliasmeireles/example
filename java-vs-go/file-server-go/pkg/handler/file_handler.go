@@ -10,6 +10,7 @@ import (
 	"io"
 	"mime/multipart"
 	"path/filepath"
+	"time"
 )
 
 type FileHandler struct {
@@ -112,4 +113,33 @@ func (r FileHandler) ListRequest(ctx *api_context.ApiRequestContext[*api_context
 		return
 	}
 	ctx.Ok(list)
+}
+
+func (r FileHandler) DeleteRequest(ctx *api_context.ApiRequestContext[*api_context.DefaultContext]) {
+	queryParams := ctx.QueryValues["resource"]
+
+	dirName := "/"
+
+	if queryParams != nil {
+		dirName = queryParams[0]
+	}
+
+	err := r.storageService.Delete(dirName)
+	if err != nil {
+		ctx.InternalServerError("Failed to delete files: " + err.Error())
+		return
+	}
+
+	now := time.Now()
+
+	timestamp := int(now.Unix())
+
+	response := map[string]interface{}{
+		"code":      200,
+		"success":   true,
+		"message":   "File deleted successfully.",
+		"timestamp": timestamp,
+	}
+
+	ctx.Ok(response)
 }
