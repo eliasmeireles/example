@@ -39,6 +39,7 @@ COPY --from=builder  app/file-server /bin/file-server
 COPY --from=builder  app/resources/users.json /opt/resources/users.json
 COPY --from=builder  app/resources/openapi.yaml /opt/resources/openapi.yaml
 
+ENV ENV_STORAGE_PATH /file-server
 ENV API_SECRET_AUTHORIZATION fdotWXwes9ngUblnI9owMP2Z
 ENV AUTHORIZATION_RESOURCE_PATH /opt/resources/users.json
 ENV OPENAPI_RESOURCE_PATH /opt/resources/openapi.yaml
