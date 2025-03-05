@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Define ANSI color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
 # Define default values
 COUNT=1
 WORK_DIR=$(pwd)
@@ -19,7 +28,7 @@ function request() {
   local port=$1
   local i=$2
 
-  echo "Request $i/$COUNT to port $port:"
+  echo -e "${CYAN}Request $i/$COUNT to port $port:${NC}"
 
   # Measure the time taken for the authorization request
   local auth_start_time=$(date +%s%N)
@@ -36,7 +45,7 @@ function request() {
   local jwt_token=$(echo $auth_response | jq -r '.jwt')
 
   if [ -z "$jwt_token" ] || [ "$jwt_token" == "null" ]; then
-    echo "Failed to get JWT token for port $port"
+    echo -e "${RED}Failed to get JWT token for port $port${NC}"
     if [ "$port" -eq 8080 ]; then
       # Increment error counter for Java
       read -r total_time success error < "$TMP_FILE_JAVA"
@@ -49,7 +58,7 @@ function request() {
     return
   fi
 
-  echo "JWT Token for port $port: $jwt_token"
+  echo -e "${GREEN}JWT Token for port $port: $jwt_token${NC}"
 
   # Measure the time taken for the file upload request
   local upload_start_time=$(date +%s%N)
@@ -65,7 +74,7 @@ function request() {
 
   # Check if the upload request was successful by looking for "fileDownloadUri" in the response
   if echo "$upload_response" | jq -e '.fileDownloadUri' > /dev/null 2>&1; then
-    echo "Upload successful for port $port"
+    echo -e "${GREEN}Upload successful for port $port${NC}"
     if [ "$port" -eq 8080 ]; then
       # Increment success counter for Java
       read -r total_time_java success_java error_java < "$TMP_FILE_JAVA"
@@ -76,7 +85,7 @@ function request() {
       echo "$((total_time_go + total_time)) $((success_go + 1)) $error_go" > "$TMP_FILE_GO"
     fi
   else
-    echo "Upload failed for port $port"
+    echo -e "${RED}Upload failed for port $port${NC}"
     if [ "$port" -eq 8080 ]; then
       # Increment error counter for Java
       read -r total_time_java success_java error_java < "$TMP_FILE_JAVA"
@@ -88,16 +97,16 @@ function request() {
     fi
   fi
 
-  echo "Authorization time for port $port: ${auth_time}ms"
-  echo "Upload time for port $port: ${upload_time}ms"
-  echo -e "Total time for port $port: ${total_time}ms\n-----\n"
+  echo -e "${BLUE}Authorization time for port $port: ${auth_time}ms${NC}"
+  echo -e "${BLUE}Upload time for port $port: ${upload_time}ms${NC}"
+  echo -e "${MAGENTA}Total time for port $port: ${total_time}ms${NC}\n-----"
 }
 
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     --count) COUNT=$2; shift ;;
-    *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    *) echo -e "${RED}Unknown parameter passed: $1${NC}"; exit 1 ;;
   esac
   shift
 done
@@ -107,7 +116,7 @@ pids=()
 
 # Make requests in parallel to both ports
 for ((i=1; i<=COUNT; i++)); do
-  echo "Benchmarking request $i/$COUNT:"
+  echo -e "${CYAN}Benchmarking request $i/$COUNT:${NC}"
   request 8080 $i & # Java Spring Boot (run in background)
   pids+=($!)       # Store PID of the background process
   request 8081 $i & # Go (run in background)
@@ -128,19 +137,19 @@ average_time_java=$(echo "scale=2; $total_time_java / $COUNT" | bc)
 average_time_go=$(echo "scale=2; $total_time_go / $COUNT" | bc)
 
 # Log benchmark results
-echo "Benchmark Results:"
-echo "Java Spring Boot (port 8080):"
-echo "  Total time for $COUNT requests: ${total_time_java}ms"
-echo "  Average time per request: ${average_time_java}ms"
-echo "  Successful requests: ${success_java}"
-echo "  Failed requests: ${error_java}"
-echo "Go (port 8081):"
-echo "  Total time for $COUNT requests: ${total_time_go}ms"
-echo "  Average time per request: ${average_time_go}ms"
-echo "  Successful requests: ${success_go}"
-echo "  Failed requests: ${error_go}"
+echo -e "${CYAN}Benchmark Results:${NC}"
+echo -e "${YELLOW}Java Spring Boot (port 8080):${NC}"
+echo -e "  Total time for $COUNT requests: ${total_time_java}ms"
+echo -e "  Average time per request: ${average_time_java}ms"
+echo -e "  ${GREEN}Successful requests: ${success_java}${NC}"
+echo -e "  ${RED}Failed requests: ${error_java}${NC}"
+echo -e "${YELLOW}Go (port 8081):${NC}"
+echo -e "  Total time for $COUNT requests: ${total_time_go}ms"
+echo -e "  Average time per request: ${average_time_go}ms"
+echo -e "  ${GREEN}Successful requests: ${success_go}${NC}"
+echo -e "  ${RED}Failed requests: ${error_go}${NC}"
 
 # Clean up temporary files
 rm -f "$TMP_FILE_JAVA" "$TMP_FILE_GO"
 
-echo "Benchmarking completed."
+echo -e "${GREEN}Benchmarking completed.${NC}"
