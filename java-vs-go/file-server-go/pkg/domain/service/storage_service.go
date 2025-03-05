@@ -139,6 +139,10 @@ func (s _storageServiceImpl) List(dirPath string) (gen.Data, error) {
 		return gen.Data{}, fmt.Errorf("failed to unmarshal paths to interface{}: %v", err)
 	}
 
+	if pathInterface == nil {
+		pathInterface = []string{}
+	}
+
 	// Return the result as gen.Data
 	return gen.Data{
 		Path: &pathInterface,
