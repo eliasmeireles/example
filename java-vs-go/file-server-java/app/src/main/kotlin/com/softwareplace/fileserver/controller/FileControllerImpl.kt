@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController
 class FileControllerImpl(
     private val fileStorageService: FileStorageService
 ) : FileController {
-    override suspend fun delete(filePath: String): ResponseEntity<ResponseRest> {
-        fileStorageService.delete(filePath)
-        return "$filePath deleted success".ok(true)
+    override suspend fun delete(resource: String): ResponseEntity<ResponseRest> {
+        fileStorageService.delete(resource)
+        return "$resource deleted success".ok(true)
     }
 
     override suspend fun downloadFile(filePath: String): ResponseEntity<Resource> {

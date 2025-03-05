@@ -169,7 +169,7 @@ paths:
       summary: Delete a file or dir by name
       operationId: delete
       parameters:
-        - name: filePath
+        - name: resource
           in: query
           required: true
           schema:

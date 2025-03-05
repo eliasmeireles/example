@@ -93,12 +93,12 @@ class FileStorageService(
     }
 
 
-    fun delete(filePath: String) {
+    fun delete(resource: String) {
         try {
             val baseStoragePath = properties.storagePath
 
             // Normalize the file path
-            val normalizedFilePath = Paths.get("${properties.storagePath}/$filePath")
+            val normalizedFilePath = Paths.get("${properties.storagePath}/$resource")
                 .toAbsolutePath()
                 .normalize()
 
