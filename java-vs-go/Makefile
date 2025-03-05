@@ -8,7 +8,7 @@ down:
 	@cd file-server-java && make local-down
 
 build:
-	@go build -o bin/$(uname -m)/benchmark  benchmark.go
+	@go build -o bin/$$(uname -m)/benchmark  benchmark.go
 
 test:
 	@./bin/$$(uname -m)/benchmark --count $(counter)

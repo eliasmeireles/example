@@ -72,6 +72,13 @@ func request(port int, i int, counter *Counter, wg *sync.WaitGroup) {
 	}
 	defer authResp.Body.Close()
 
+	// Validate authorization response status code
+	if authResp.StatusCode != http.StatusOK {
+		fmt.Printf("%sAuthorization failed for port %d: Status Code %d%s\n", Red, port, authResp.StatusCode, Reset)
+		counter.Update(0, 0, 1)
+		return
+	}
+
 	var authResult map[string]interface{}
 	json.NewDecoder(authResp.Body).Decode(&authResult)
 	jwtToken, ok := authResult["jwt"].(string)
@@ -114,6 +121,13 @@ func request(port int, i int, counter *Counter, wg *sync.WaitGroup) {
 		return
 	}
 	defer uploadResp.Body.Close()
+
+	// Validate upload response status code
+	if uploadResp.StatusCode != http.StatusOK {
+		fmt.Printf("%sUpload failed for port %d: Status Code %d%s\n", Red, port, uploadResp.StatusCode, Reset)
+		counter.Update(0, 0, 1)
+		return
+	}
 
 	uploadTime := time.Since(uploadStartTime).Milliseconds()
 	totalTime := authTime + uploadTime
