@@ -63,8 +63,8 @@ function request() {
 
   local total_time=$((auth_time + upload_time))
 
-  # Check if the upload request was successful
-  if [[ "$upload_response" == *"\"success\":true"* ]]; then
+  # Check if the upload request was successful by looking for "fileDownloadUri" in the response
+  if echo "$upload_response" | jq -e '.fileDownloadUri' > /dev/null 2>&1; then
     echo "Upload successful for port $port"
     if [ "$port" -eq 8080 ]; then
       # Increment success counter for Java
