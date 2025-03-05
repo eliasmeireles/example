@@ -6,9 +6,13 @@ WORK_DIR=$(pwd)
 USERNAME="file-server@user.com"
 PASSWORD="123456"
 
-# Variables to store total time for each server
-total_time_java=0
-total_time_go=0
+# Temporary files to store counters
+TMP_FILE_JAVA=$(mktemp)
+TMP_FILE_GO=$(mktemp)
+
+# Initialize counters in temporary files
+echo "0 0 0" > "$TMP_FILE_JAVA" # total_time, success, error
+echo "0 0 0" > "$TMP_FILE_GO"   # total_time, success, error
 
 # Function to make a request and measure time
 function request() {
@@ -33,6 +37,15 @@ function request() {
 
   if [ -z "$jwt_token" ] || [ "$jwt_token" == "null" ]; then
     echo "Failed to get JWT token for port $port"
+    if [ "$port" -eq 8080 ]; then
+      # Increment error counter for Java
+      read -r total_time success error < "$TMP_FILE_JAVA"
+      echo "$total_time $success $((error + 1))" > "$TMP_FILE_JAVA"
+    elif [ "$port" -eq 8081 ]; then
+      # Increment error counter for Go
+      read -r total_time success error < "$TMP_FILE_GO"
+      echo "$total_time $success $((error + 1))" > "$TMP_FILE_GO"
+    fi
     return
   fi
 
@@ -40,26 +53,44 @@ function request() {
 
   # Measure the time taken for the file upload request
   local upload_start_time=$(date +%s%N)
-  curl --location "http://localhost:$port/api/file-server/v1/files/upload" \
+  local upload_response=$(curl -s --location "http://localhost:$port/api/file-server/v1/files/upload" \
     --header "Authorization: $jwt_token" \
     --form "resource=@\"$WORK_DIR/large-63mb.pdf\"" \
     --form 'fileName="large-file"' \
-    --form 'dirName="overload-test"'
+    --form 'dirName="overload-test"')
   local upload_end_time=$(date +%s%N)
   local upload_time=$(( (upload_end_time - upload_start_time) / 1000000 )) # Convert to milliseconds
 
   local total_time=$((auth_time + upload_time))
 
+  # Check if the upload request was successful
+  if [[ "$upload_response" == *"\"success\":true"* ]]; then
+    echo "Upload successful for port $port"
+    if [ "$port" -eq 8080 ]; then
+      # Increment success counter for Java
+      read -r total_time_java success_java error_java < "$TMP_FILE_JAVA"
+      echo "$((total_time_java + total_time)) $((success_java + 1)) $error_java" > "$TMP_FILE_JAVA"
+    elif [ "$port" -eq 8081 ]; then
+      # Increment success counter for Go
+      read -r total_time_go success_go error_go < "$TMP_FILE_GO"
+      echo "$((total_time_go + total_time)) $((success_go + 1)) $error_go" > "$TMP_FILE_GO"
+    fi
+  else
+    echo "Upload failed for port $port"
+    if [ "$port" -eq 8080 ]; then
+      # Increment error counter for Java
+      read -r total_time_java success_java error_java < "$TMP_FILE_JAVA"
+      echo "$((total_time_java + total_time)) $success_java $((error_java + 1))" > "$TMP_FILE_JAVA"
+    elif [ "$port" -eq 8081 ]; then
+      # Increment error counter for Go
+      read -r total_time_go success_go error_go < "$TMP_FILE_GO"
+      echo "$((total_time_go + total_time)) $success_go $((error_go + 1))" > "$TMP_FILE_GO"
+    fi
+  fi
+
   echo "Authorization time for port $port: ${auth_time}ms"
   echo "Upload time for port $port: ${upload_time}ms"
   echo -e "Total time for port $port: ${total_time}ms\n-----\n"
-
-  # Accumulate total time for the respective server
-  if [ "$port" -eq 8080 ]; then
-    total_time_java=$((total_time_java + total_time))
-  elif [ "$port" -eq 8081 ]; then
-    total_time_go=$((total_time_go + total_time))
-  fi
 }
 
 # Parse arguments
@@ -88,6 +119,10 @@ for pid in "${pids[@]}"; do
   wait "$pid"
 done
 
+# Read final counters from temporary files
+read -r total_time_java success_java error_java < "$TMP_FILE_JAVA"
+read -r total_time_go success_go error_go < "$TMP_FILE_GO"
+
 # Calculate average time for each server
 average_time_java=$(echo "scale=2; $total_time_java / $COUNT" | bc)
 average_time_go=$(echo "scale=2; $total_time_go / $COUNT" | bc)
@@ -97,8 +132,15 @@ echo "Benchmark Results:"
 echo "Java Spring Boot (port 8080):"
 echo "  Total time for $COUNT requests: ${total_time_java}ms"
 echo "  Average time per request: ${average_time_java}ms"
+echo "  Successful requests: ${success_java}"
+echo "  Failed requests: ${error_java}"
 echo "Go (port 8081):"
 echo "  Total time for $COUNT requests: ${total_time_go}ms"
 echo "  Average time per request: ${average_time_go}ms"
+echo "  Successful requests: ${success_go}"
+echo "  Failed requests: ${error_go}"
+
+# Clean up temporary files
+rm -f "$TMP_FILE_JAVA" "$TMP_FILE_GO"
 
 echo "Benchmarking completed."
