@@ -27,6 +27,7 @@ const (
 // Define default values
 var (
 	count     = 1
+	parallel  = true
 	workDir   = "."
 	username  = "file-server@user.com"
 	password  = "123456"
@@ -150,9 +151,16 @@ func request(port int, i int, counter *Counter, wg *sync.WaitGroup) {
 
 func main() {
 	// Parse arguments
-	if len(os.Args) > 1 && os.Args[1] == "--count" {
-		if len(os.Args) > 2 {
-			count, _ = strconv.Atoi(os.Args[2])
+	if len(os.Args) > 1 {
+		for i := 1; i < len(os.Args); i++ {
+			if os.Args[i] == "--count" && i+1 < len(os.Args) {
+				count, _ = strconv.Atoi(os.Args[i+1])
+				i++
+			} else if os.Args[i] == "--sync" {
+				parallel = false
+			} else if os.Args[i] == "--async" {
+				parallel = true
+			}
 		}
 	}
 
@@ -169,6 +177,9 @@ func main() {
 		wg.Add(2)
 		go request(8080, i, javaCounter, &wg) // Java Spring Boot
 		go request(8081, i, goCounter, &wg)   // Go
+		if !parallel {
+			wg.Wait()
+		}
 	}
 
 	// Wait for all goroutines to complete
