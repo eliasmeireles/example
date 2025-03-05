@@ -95,6 +95,10 @@ class FileStorageService(
 
     fun delete(resource: String) {
         try {
+            if (resource.isBlank()) {
+                throw throw SecurityException("Illegal operation: file path is outside the base storage path")
+            }
+
             val baseStoragePath = properties.storagePath
 
             // Normalize the file path
