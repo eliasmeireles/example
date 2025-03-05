@@ -20,6 +20,8 @@ class FileStorageService(
     private val properties: AppProperties
 ) {
 
+    class FileStorageException(message: String, cause: Throwable) : Exception(message, cause)
+
     private val fileStorageLocation: Path = Paths.get(properties.storagePath)
         .toAbsolutePath()
         .normalize()
@@ -53,7 +55,10 @@ class FileStorageService(
 
     fun loadFileAsResource(filePath: String): Resource {
         try {
-            val path = fileStorageLocation.resolve("${properties.storagePath}/$filePath").normalize()
+            val path = Paths.get("${properties.storagePath}/$filePath")
+                .toAbsolutePath()
+                .normalize()
+
             val resource = UrlResource(path.toUri())
             return if (resource.exists()) {
                 resource
@@ -69,19 +74,65 @@ class FileStorageService(
     fun list(resource: String?): DataRest? {
         val list = mutableListOf<String>()
 
-        val path = fileStorageLocation.resolve("${properties.storagePath}/${resource ?: ""}").normalize()
+        val path = Paths.get("${properties.storagePath}/${resource ?: ""}")
+            .toAbsolutePath()
+            .normalize()
 
         val files = path.toFile().listFiles()
         files?.forEach {
             if (it.isDirectory) {
                 it.listFiles()?.forEach { file ->
-                    list.add(file.path.replace(fileStorageLocation.toString(), ""))
+                    list.add(file.path.replace(fileStorageLocation.toString(), "/files/download?filePath="))
                 }
             } else {
-                list.add(it.path.replace(fileStorageLocation.toString(), ""))
+                list.add(it.path.replace(fileStorageLocation.toString(), "/files/download?filePath="))
             }
         }
 
         return DataRest(list)
+    }
+
+
+    fun delete(filePath: String) {
+        try {
+            val baseStoragePath = properties.storagePath
+
+            // Normalize the file path
+            val normalizedFilePath = Paths.get("${properties.storagePath}/$filePath")
+                .toAbsolutePath()
+                .normalize()
+
+            // Ensure the file path is within the base storage path
+            val basePath = Paths.get(baseStoragePath).toAbsolutePath().normalize()
+            if (!normalizedFilePath.startsWith(basePath)) {
+                throw SecurityException("Illegal operation: file path is outside the base storage path")
+            }
+
+            // Check if the path exists
+            if (Files.exists(normalizedFilePath)) {
+                // Delete the file or directory recursively
+                if (Files.isDirectory(normalizedFilePath)) {
+                    // Recursively delete directory and its contents
+                    Files.walk(normalizedFilePath)
+                        .sorted(Comparator.reverseOrder()) // Delete files before directories
+                        .forEach { path ->
+                            try {
+                                Files.deleteIfExists(path)
+                            } catch (ex: IOException) {
+                                throw FileStorageException("Failed to delete $path", ex)
+                            }
+                        }
+                } else {
+                    // Delete a single file
+                    Files.deleteIfExists(normalizedFilePath)
+                }
+            } else {
+                println("File or directory does not exist: $normalizedFilePath")
+            }
+        } catch (ex: IOException) {
+            throw FileStorageException("Could not delete the file or directory. Please try again!", ex)
+        } catch (ex: SecurityException) {
+            throw FileStorageException("Illegal operation: ${ex.message}", ex)
+        }
     }
 }

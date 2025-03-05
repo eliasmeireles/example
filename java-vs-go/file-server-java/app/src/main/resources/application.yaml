@@ -7,7 +7,7 @@ spring:
   main:
     web-application-type: servlet
   storage:
-    storage-path: ${ENV_STORAGE_PATH:${user.home}/.file-server/java/}
+    storage-path: ${ENV_STORAGE_PATH:${user.home}/file-server}
     authorization-path: ${ENV_AUTHORIZATION_PATH:classpath:/users.json}
 
   servlet:

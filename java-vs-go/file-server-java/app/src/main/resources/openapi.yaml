@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: File Server Java Api
+  title: File Server GO Api
   description: |-
-    File Server Java Api
+    File Server GO Api
   version: 1.0.0
 paths:
   /health:
@@ -95,7 +95,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Response"
 
-  /file/upload:
+  /files/upload:
     post:
       tags:
         - File
@@ -135,7 +135,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Response"
 
-  /file/download:
+  /files/download:
     get:
       tags:
         - File
@@ -163,6 +163,31 @@ paths:
                 $ref: "#/components/schemas/Response"
 
   /files:
+    delete:
+      tags:
+        - File
+      summary: Delete a file or dir by name
+      operationId: delete
+      parameters:
+        - name: filePath
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        '500':
+          description: Error in request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
     get:
       tags:
         - File
@@ -205,7 +230,7 @@ components:
     Data:
       type: object
       properties:
-        path:
+        paths:
           items:
             type: string
     UploadFileResponse:

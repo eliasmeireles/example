@@ -2,6 +2,7 @@ package com.softwareplace.fileserver.controller
 
 import com.softwareplace.fileserver.rest.controller.FileController
 import com.softwareplace.fileserver.rest.model.DataRest
+import com.softwareplace.fileserver.rest.model.ResponseRest
 import com.softwareplace.fileserver.rest.model.UploadFileResponseRest
 import com.softwareplace.fileserver.service.FileStorageService
 import org.springframework.core.io.Resource
@@ -14,6 +15,10 @@ import org.springframework.web.bind.annotation.RestController
 class FileControllerImpl(
     private val fileStorageService: FileStorageService
 ) : FileController {
+    override suspend fun delete(filePath: String): ResponseEntity<ResponseRest> {
+        fileStorageService.delete(filePath)
+        return "$filePath deleted success".ok(true)
+    }
 
     override suspend fun downloadFile(filePath: String): ResponseEntity<Resource> {
         val resource = fileStorageService.loadFileAsResource(filePath = filePath)
@@ -40,7 +45,7 @@ class FileControllerImpl(
 
             val uploadFileResponse = UploadFileResponseRest(
                 fileName,
-                "file/download/$this",
+                "/files/download?filePath=$this",
                 getFileExtension(resource.filename!!),
                 resource.contentLength(),
                 getFileExtension(resource.filename!!)
