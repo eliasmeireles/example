@@ -1,0 +1,301 @@
+openapi: 3.0.3
+info:
+  title: File Server GO Api
+  description: |-
+    File Server GO Api
+  version: 1.0.0
+paths:
+  /health:
+    get:
+      tags:
+        - Health Check
+      summary: Check application status
+      description: Check application status
+      operationId: healthGet
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        '500':
+          description: Error request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
+  /authorization:
+    post:
+      tags:
+        - Authorization
+      summary: Get api access authorization token
+      description: Get api access authorization token
+      operationId: getAuthorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInfo"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Authorization"
+        '403':
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        '500':
+          description: Error request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
+
+  /authorization/gen:
+    post:
+      tags:
+        - Authorization
+      summary: Return a user authorization data that can be used to access the api
+      description: Return a user authorization data that can be used to access the api
+      operationId: authorizationGen
+      parameters:
+        - $ref: "#/components/parameters/AccessToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInfo"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserContent"
+        '403':
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        '500':
+          description: Error request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
+  /files/upload:
+    post:
+      tags:
+        - File
+      summary: Upload a single file
+      parameters:
+        - $ref: "#/components/parameters/AccessToken"
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                resource:
+                  type: string
+                  format: binary
+                dirName:
+                  type: string
+                fileName:
+                  type: string
+              required:
+                - resource
+                - dirName
+                - fileName
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadFileResponse"
+        '500':
+          description: Error in request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
+  /files/download:
+    get:
+      tags:
+        - File
+      summary: Download a file by name
+      operationId: downloadFile
+      parameters:
+        - name: filePath
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '500':
+          description: Error in request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
+  /files:
+    delete:
+      tags:
+        - File
+      summary: Delete a file or dir by name
+      operationId: delete
+      parameters:
+        - name: resource
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        '500':
+          description: Error in request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
+    get:
+      tags:
+        - File
+      summary: List available files from storage path
+      operationId: list
+      parameters:
+        - $ref: "#/components/parameters/AccessToken"
+        - name: resource
+          in: query
+          required: false
+          schema:
+            type: string
+            default: "/"
+
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Data'
+        '500':
+          description: Error in request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+
+components:
+  parameters:
+    AccessToken:
+      in: header
+      required: true
+      name: Authorization
+      schema:
+        type: string
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+  schemas:
+    Data:
+      type: object
+      properties:
+        paths:
+          items:
+            type: string
+    UploadFileResponse:
+      type: object
+      properties:
+        fileName:
+          type: string
+        fileDownloadUri:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+          format: int64
+        extension:
+          type: string
+    UserInfo:
+      type: object
+      properties:
+        username:
+          type: string
+          example: file-server@user.com
+        password:
+          type: string
+          example: 123456
+      required:
+        - username
+        - password
+    Response:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        message:
+          type: string
+        success:
+          type: boolean
+        errorInfo:
+          type: object
+      required:
+        - timestamp
+        - message
+        - success
+    UserContent:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        authToken:
+          type: string
+      required:
+        - username
+        - password
+        - authToken
+
+    Authorization:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Response"
+      properties:
+        jwt:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      required:
+        - jwt

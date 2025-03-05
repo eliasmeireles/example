@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+  file-server-java:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      args:
+        PORT: 8080
+    image: file-server-java
+    container_name: file-server-java
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: "1g"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://172.17.0.1:8080/api/file-server/v1/health" ]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "8080:8080"
+    volumes:
+      - ~/file-server/java:/file-server
+      - ~/file-server/java/logs:/.logs
