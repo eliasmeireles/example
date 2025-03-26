@@ -2,23 +2,23 @@ package handler
 
 import (
 	"file-server-go/gen"
-	apicontext "github.com/softwareplace/goserve/context"
+	goservecontext "github.com/softwareplace/goserve/context"
 	"github.com/softwareplace/goserve/security/login"
 )
 
 type AuthorizationHandler struct {
-	loginService login.Service[*apicontext.DefaultContext]
+	loginService login.Service[*goservecontext.DefaultContext]
 }
 
-func (r resourceHandler) GetAuthorization(request gen.GetAuthorizationClientRequest, ctx *apicontext.Request[*apicontext.DefaultContext]) {
+func (r resourceHandler) GetAuthorization(request gen.GetAuthorizationClientRequest, ctx *goservecontext.Request[*goservecontext.DefaultContext]) {
 	r._authorizationGenerator(request.Body, ctx)
 }
 
-func (r resourceHandler) AuthorizationGen(request gen.AuthorizationGenClientRequest, ctx *apicontext.Request[*apicontext.DefaultContext]) {
+func (r resourceHandler) AuthorizationGen(request gen.AuthorizationGenClientRequest, ctx *goservecontext.Request[*goservecontext.DefaultContext]) {
 	r._authorizationGenerator(request.Body, ctx)
 }
 
-func (r AuthorizationHandler) _authorizationGenerator(requestBody gen.UserInfo, ctx *apicontext.Request[*apicontext.DefaultContext]) {
+func (r AuthorizationHandler) _authorizationGenerator(requestBody gen.UserInfo, ctx *goservecontext.Request[*goservecontext.DefaultContext]) {
 	//login, err := r.loginService.Login(login.User{
 	//	Username: requestBody.Username,
 	//	Password: requestBody.Password,

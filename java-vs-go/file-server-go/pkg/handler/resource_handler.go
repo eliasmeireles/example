@@ -3,7 +3,7 @@ package handler
 import (
 	"file-server-go/gen"
 	"file-server-go/pkg/provider"
-	apicontext "github.com/softwareplace/goserve/context"
+	goservecontext "github.com/softwareplace/goserve/context"
 	"github.com/softwareplace/goserve/server"
 	"sync"
 )
@@ -19,7 +19,7 @@ var (
 	once     sync.Once
 )
 
-func New() gen.ApiRequestService[*apicontext.DefaultContext] {
+func New() gen.ApiRequestService[*goservecontext.DefaultContext] {
 	once.Do(func() {
 		instance = resourceHandler{
 			AuthorizationHandler: authorizationHandler(),
@@ -43,7 +43,7 @@ func fileHandler() FileHandler {
 }
 
 func EmbeddedServer(
-	handler server.Api[*apicontext.DefaultContext],
+	handler server.Api[*goservecontext.DefaultContext],
 ) {
 	gen.RequestServiceHandler(handler, New())
 }

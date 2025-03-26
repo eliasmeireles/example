@@ -6,7 +6,7 @@ import (
 	"file-server-go/pkg/provider"
 	"fmt"
 	"github.com/labstack/gommon/log"
-	apicontext "github.com/softwareplace/goserve/context"
+	goservecontext "github.com/softwareplace/goserve/context"
 	"io"
 	"mime/multipart"
 	"path/filepath"
@@ -19,7 +19,7 @@ type FileHandler struct {
 
 func (r resourceHandler) Delete(
 	request gen.DeleteClientRequest,
-	ctx *apicontext.Request[*apicontext.DefaultContext],
+	ctx *goservecontext.Request[*goservecontext.DefaultContext],
 ) {
 	err := r.storageService.Delete(request.FilePath)
 	if err != nil {
@@ -43,7 +43,7 @@ func (r resourceHandler) Delete(
 
 func (r resourceHandler) List(
 	request gen.ListClientRequest,
-	ctx *apicontext.Request[*apicontext.DefaultContext],
+	ctx *goservecontext.Request[*goservecontext.DefaultContext],
 ) {
 	dirName := "/"
 
@@ -62,7 +62,7 @@ func (r resourceHandler) List(
 
 func (r resourceHandler) DownloadFile(
 	request gen.DownloadFileClientRequest,
-	ctx *apicontext.Request[*apicontext.DefaultContext],
+	ctx *goservecontext.Request[*goservecontext.DefaultContext],
 ) {
 	// Download the file
 	file, err := r.storageService.DownloadFile(request.FilePath)
@@ -92,8 +92,9 @@ func (r resourceHandler) DownloadFile(
 
 func (r resourceHandler) UploadFile(
 	request gen.UploadFileClientRequest,
-	ctx *apicontext.Request[*apicontext.DefaultContext],
+	ctx *goservecontext.Request[*goservecontext.DefaultContext],
 ) {
+
 	// Parse the multipart form
 	err := ctx.Request.ParseMultipartForm(10 << provider.AppEnv.MaxFileSize)
 	if err != nil {
