@@ -9,8 +9,6 @@ import (
 )
 
 type AppEnv struct {
-	Port                      string
-	ContextPath               string
 	OpenapiResourcePath       string
 	StoragePath               string
 	ApiSecretAuthorization    string
@@ -26,13 +24,10 @@ func SetAppEnv(appEnv *AppEnv) {
 
 func GetAppEnv() *AppEnv {
 	if env == nil {
-		contextPath := os.Getenv("CONTEXT_PATH")
 		storagePath := os.Getenv("ENV_STORAGE_PATH")
 		apiSecretAuthorization := os.Getenv("API_SECRET_AUTHORIZATION")
 		openapiResourcePath := os.Getenv("OPENAPI_RESOURCE_PATH")
 		authorizationResourcePath := os.Getenv("AUTHORIZATION_RESOURCE_PATH")
-
-		port := os.Getenv("PORT")
 
 		if storagePath == "" {
 			storagePath = os.Getenv("HOME") + "/file-server/go/"
@@ -51,15 +46,6 @@ func GetAppEnv() *AppEnv {
 		if openapiResourcePath == "" {
 			openapiResourcePath = "resources/openapi.yaml"
 		}
-
-		if contextPath == "" {
-			contextPath = "/api/file-server/v1/"
-		}
-
-		if port == "" {
-			port = "8080"
-		}
-
 		flag.Parse()
 		storagePath = strings.TrimSuffix(storagePath, "/")
 
@@ -70,8 +56,6 @@ func GetAppEnv() *AppEnv {
 		}
 
 		env = &AppEnv{
-			Port:                      port,
-			ContextPath:               strings.TrimSuffix(contextPath, "/") + "/",
 			OpenapiResourcePath:       openapiResourcePath,
 			StoragePath:               storagePath,
 			ApiSecretAuthorization:    apiSecretAuthorization,

@@ -2,14 +2,14 @@ package handler
 
 import (
 	"file-server-go/gen"
-	"github.com/softwareplace/http-utils/api_context"
+	apicontext "github.com/softwareplace/goserve/context"
 
 	"time"
 )
 
 type HealthHandler struct{}
 
-func (r HealthHandler) HealthGetRequest(ctx *api_context.ApiRequestContext[*api_context.DefaultContext]) {
+func (r resourceHandler) HealthGet(ctx *apicontext.Request[*apicontext.DefaultContext]) {
 	now := time.Now()
 
 	timestamp := int(now.Unix())

@@ -3,17 +3,20 @@ package main
 import (
 	"file-server-go/pkg/handler"
 	"file-server-go/pkg/provider"
-	"github.com/softwareplace/http-utils/server"
+	"github.com/softwareplace/goserve/logger"
+	"github.com/softwareplace/goserve/server"
 )
+
+func init() {
+	logger.LogSetup()
+}
 
 func main() {
 	appEnv := provider.AppEnv
 
 	server.Default().
-		WithPort(appEnv.Port).
-		WithContextPath(appEnv.ContextPath).
-		WithLoginResource(provider.UserService).
-		WithPrincipalService(provider.PrincipalService).
+		LoginService(provider.UserService).
+		PrincipalService(provider.PrincipalService).
 		EmbeddedServer(handler.EmbeddedServer).
 		SwaggerDocHandler(appEnv.OpenapiResourcePath).
 		StartServer()

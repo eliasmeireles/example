@@ -2,8 +2,8 @@ package security
 
 import (
 	"file-server-go/pkg/domain/repository"
-	"github.com/softwareplace/http-utils/api_context"
-	"github.com/softwareplace/http-utils/security/principal"
+	apicontext "github.com/softwareplace/goserve/context"
+	"github.com/softwareplace/goserve/security/principal"
 	"sync"
 )
 
@@ -13,10 +13,10 @@ type principalServiceImpl struct {
 
 var (
 	principalServiceOnce     sync.Once
-	principalServiceInstance principal.PService[*api_context.DefaultContext]
+	principalServiceInstance principal.Service[*apicontext.DefaultContext]
 )
 
-func GetPrincipalService() principal.PService[*api_context.DefaultContext] {
+func New() principal.Service[*apicontext.DefaultContext] {
 	principalServiceOnce.Do(func() {
 		principalServiceInstance = &principalServiceImpl{
 			repository: repository.NewUserRepository(),
@@ -25,14 +25,14 @@ func GetPrincipalService() principal.PService[*api_context.DefaultContext] {
 	return principalServiceInstance
 }
 
-func (p principalServiceImpl) LoadPrincipal(ctx *api_context.ApiRequestContext[*api_context.DefaultContext]) bool {
+func (p principalServiceImpl) LoadPrincipal(ctx *apicontext.Request[*apicontext.DefaultContext]) bool {
 	matchingUser, err := p.repository.GetByAuthToken(ctx.AccessId)
 
 	if err != nil {
 		return false
 	}
 
-	context := api_context.NewDefaultCtx()
+	context := apicontext.NewDefaultCtx()
 	context.SetRoles(matchingUser.Roles...)
 	context.SetEncryptedPassword(matchingUser.Password)
 	ctx.Principal = &context

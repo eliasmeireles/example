@@ -2,25 +2,25 @@ package service
 
 import (
 	"file-server-go/pkg/domain/repository"
-	"github.com/softwareplace/http-utils/api_context"
-	"github.com/softwareplace/http-utils/security"
-	"github.com/softwareplace/http-utils/server"
+	apicontext "github.com/softwareplace/goserve/context"
+	"github.com/softwareplace/goserve/security"
+	"github.com/softwareplace/goserve/security/login"
 	"sync"
 	"time"
 )
 
 type userLoginServiceImpl struct {
-	server.DefaultPasswordValidator[*api_context.DefaultContext]
-	securityService security.ApiSecurityService[*api_context.DefaultContext]
+	login.DefaultPasswordValidator[*apicontext.DefaultContext]
+	securityService security.Service[*apicontext.DefaultContext]
 	repository      repository.UserRepository
 }
 
 var (
 	loginServiceOnce     sync.Once
-	loginServiceInstance server.LoginService[*api_context.DefaultContext]
+	loginServiceInstance login.Service[*apicontext.DefaultContext]
 )
 
-func GetLoginService(securityService security.ApiSecurityService[*api_context.DefaultContext]) server.LoginService[*api_context.DefaultContext] {
+func GetLoginService(securityService security.Service[*apicontext.DefaultContext]) login.Service[*apicontext.DefaultContext] {
 	loginServiceOnce.Do(func() {
 		loginServiceInstance = &userLoginServiceImpl{
 			securityService: securityService,
@@ -31,17 +31,17 @@ func GetLoginService(securityService security.ApiSecurityService[*api_context.De
 	return loginServiceInstance
 }
 
-func (u userLoginServiceImpl) SecurityService() security.ApiSecurityService[*api_context.DefaultContext] {
+func (u userLoginServiceImpl) SecurityService() security.Service[*apicontext.DefaultContext] {
 	return u.securityService
 }
 
-func (u userLoginServiceImpl) Login(user server.LoginEntryData) (*api_context.DefaultContext, error) {
+func (u userLoginServiceImpl) Login(user login.User) (*apicontext.DefaultContext, error) {
 	matchingUser, err := u.repository.GetByUsername(user.Username)
 	if err != nil {
 		return nil, err
 	}
 
-	ctx := api_context.NewDefaultCtx()
+	ctx := apicontext.NewDefaultCtx()
 	ctx.SetEncryptedPassword(matchingUser.Password)
 	ctx.SetRoles(matchingUser.Roles...)
 
