@@ -6,7 +6,7 @@ import (
 	"file-server-go/pkg/env"
 	"file-server-go/pkg/utils"
 	"fmt"
-	"github.com/labstack/gommon/log"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"mime/multipart"
 	"os"
@@ -70,18 +70,18 @@ func (s _storageServiceImpl) SaveFile(
 		return nil, err
 	}
 
+	// Copy the uploaded file to the server file
+	_, err = io.Copy(outFile, file)
+	if err != nil {
+		return nil, err
+	}
+
 	defer func(outFile *os.File) {
 		err := outFile.Close()
 		if err != nil {
 			log.Errorf("Failed to close file: %v", err)
 		}
 	}(outFile)
-
-	// Copy the uploaded file to the server file
-	_, err = io.Copy(outFile, file)
-	if err != nil {
-		return nil, err
-	}
 
 	fullFileName := fmt.Sprintf("%s/%s%s", dirName, fileName, fileExtension)
 

@@ -17,7 +17,10 @@ type FileHandler struct {
 	storageService service.StorageService
 }
 
-func (r resourceHandler) Delete(request gen.DeleteClientRequest, ctx *apicontext.Request[*apicontext.DefaultContext]) {
+func (r resourceHandler) Delete(
+	request gen.DeleteClientRequest,
+	ctx *apicontext.Request[*apicontext.DefaultContext],
+) {
 	err := r.storageService.Delete(request.FilePath)
 	if err != nil {
 		ctx.InternalServerError("Failed to delete files: " + err.Error())
@@ -38,7 +41,10 @@ func (r resourceHandler) Delete(request gen.DeleteClientRequest, ctx *apicontext
 	ctx.Ok(response)
 }
 
-func (r resourceHandler) List(request gen.ListClientRequest, ctx *apicontext.Request[*apicontext.DefaultContext]) {
+func (r resourceHandler) List(
+	request gen.ListClientRequest,
+	ctx *apicontext.Request[*apicontext.DefaultContext],
+) {
 	dirName := "/"
 
 	if request.Resource != "" {
@@ -54,7 +60,10 @@ func (r resourceHandler) List(request gen.ListClientRequest, ctx *apicontext.Req
 	ctx.Ok(list)
 }
 
-func (r resourceHandler) DownloadFile(request gen.DownloadFileClientRequest, ctx *apicontext.Request[*apicontext.DefaultContext]) {
+func (r resourceHandler) DownloadFile(
+	request gen.DownloadFileClientRequest,
+	ctx *apicontext.Request[*apicontext.DefaultContext],
+) {
 	// Download the file
 	file, err := r.storageService.DownloadFile(request.FilePath)
 	if err != nil {
@@ -81,7 +90,10 @@ func (r resourceHandler) DownloadFile(request gen.DownloadFileClientRequest, ctx
 	}
 }
 
-func (r resourceHandler) UploadFile(request gen.UploadFileClientRequest, ctx *apicontext.Request[*apicontext.DefaultContext]) {
+func (r resourceHandler) UploadFile(
+	request gen.UploadFileClientRequest,
+	ctx *apicontext.Request[*apicontext.DefaultContext],
+) {
 	// Parse the multipart form
 	err := ctx.Request.ParseMultipartForm(10 << provider.AppEnv.MaxFileSize)
 	if err != nil {
