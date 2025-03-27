@@ -6,7 +6,7 @@ require (
 	github.com/labstack/gommon v0.4.2
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/softwareplace/goserve v0.0.0-20250327213644-e40eccc1e027
+	github.com/softwareplace/goserve v0.0.0-20250327222532-83f486e9a464
 )
 
 require (

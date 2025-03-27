@@ -8,8 +8,8 @@ import (
 
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	log "github.com/sirupsen/logrus"
-	goservecontext "github.com/softwareplace/goserve/context"
-	goserveerrohandler "github.com/softwareplace/goserve/error"
+	goservectx "github.com/softwareplace/goserve/context"
+	goserveerror "github.com/softwareplace/goserve/error"
 	goservereflect "github.com/softwareplace/goserve/reflect"
 	"github.com/softwareplace/goserve/request"
 	"github.com/softwareplace/goserve/server"
@@ -93,17 +93,17 @@ type UploadFileParams struct {
 	Authorization AccessToken `json:"Authorization"`
 }
 
-func (rh *resourceHandlerImpl[T]) GetAuthorization(ctx *goservecontext.Request[T]) {
+func (rh *resourceHandlerImpl[T]) GetAuthorization(ctx *goservectx.Request[T]) {
 
-	goserveerrohandler.Handler(func() {
+	goserveerror.Handler(func() {
 		requestBody := UserInfo{}
-		request.GetRequestBody(ctx, requestBody, func(ctx *goservecontext.Request[T], body UserInfo) {
+		request.GetRequestBody(ctx, requestBody, func(ctx *goservectx.Request[T], body UserInfo) {
 			clientRequest := GetAuthorizationClientRequest{
 				Body: body,
 			}
 
 			rh.Service.GetAuthorization(clientRequest, ctx)
-		}, func(ctx *goservecontext.Request[T], err error) {
+		}, func(ctx *goservectx.Request[T], err error) {
 			ctx.InternalServerError("Internal server error")
 		})
 	}, func(err error) {
@@ -113,18 +113,18 @@ func (rh *resourceHandlerImpl[T]) GetAuthorization(ctx *goservecontext.Request[T
 
 }
 
-func (rh *resourceHandlerImpl[T]) AuthorizationGen(ctx *goservecontext.Request[T]) {
+func (rh *resourceHandlerImpl[T]) AuthorizationGen(ctx *goservectx.Request[T]) {
 
-	goserveerrohandler.Handler(func() {
+	goserveerror.Handler(func() {
 		requestBody := UserInfo{}
-		request.GetRequestBody(ctx, requestBody, func(ctx *goservecontext.Request[T], body UserInfo) {
+		request.GetRequestBody(ctx, requestBody, func(ctx *goservectx.Request[T], body UserInfo) {
 			clientRequest := AuthorizationGenClientRequest{
 				Body: body,
 			}
 			err := ctx.BindRequestParams(&clientRequest)
-			contentType := ctx.Request.Header.Get(goservecontext.ContentType)
+			contentType := ctx.Request.Header.Get(goservectx.ContentType)
 			// Try to load form param to the body struct. File form will be ignored.
-			if err == nil && strings.Contains(contentType, goservecontext.MultipartFormData) {
+			if err == nil && strings.Contains(contentType, goservectx.MultipartFormData) {
 				_ = goservereflect.ParamsExtract(&clientRequest.Body,
 					goservereflect.ParamsExtractorSource{
 						Tree: ctx.FormValues(),
@@ -138,7 +138,7 @@ func (rh *resourceHandlerImpl[T]) AuthorizationGen(ctx *goservecontext.Request[T
 			}
 
 			rh.Service.AuthorizationGen(clientRequest, ctx)
-		}, func(ctx *goservecontext.Request[T], err error) {
+		}, func(ctx *goservectx.Request[T], err error) {
 			ctx.InternalServerError("Internal server error")
 		})
 	}, func(err error) {
@@ -148,9 +148,9 @@ func (rh *resourceHandlerImpl[T]) AuthorizationGen(ctx *goservecontext.Request[T
 
 }
 
-func (rh *resourceHandlerImpl[T]) Delete(ctx *goservecontext.Request[T]) {
+func (rh *resourceHandlerImpl[T]) Delete(ctx *goservectx.Request[T]) {
 
-	goserveerrohandler.Handler(func() {
+	goserveerror.Handler(func() {
 
 		clientRequest := DeleteClientRequest{}
 		err := ctx.BindRequestParams(&clientRequest)
@@ -168,9 +168,9 @@ func (rh *resourceHandlerImpl[T]) Delete(ctx *goservecontext.Request[T]) {
 
 }
 
-func (rh *resourceHandlerImpl[T]) List(ctx *goservecontext.Request[T]) {
+func (rh *resourceHandlerImpl[T]) List(ctx *goservectx.Request[T]) {
 
-	goserveerrohandler.Handler(func() {
+	goserveerror.Handler(func() {
 
 		clientRequest := ListClientRequest{}
 		err := ctx.BindRequestParams(&clientRequest)
@@ -188,9 +188,9 @@ func (rh *resourceHandlerImpl[T]) List(ctx *goservecontext.Request[T]) {
 
 }
 
-func (rh *resourceHandlerImpl[T]) DownloadFile(ctx *goservecontext.Request[T]) {
+func (rh *resourceHandlerImpl[T]) DownloadFile(ctx *goservectx.Request[T]) {
 
-	goserveerrohandler.Handler(func() {
+	goserveerror.Handler(func() {
 
 		clientRequest := DownloadFileClientRequest{}
 		err := ctx.BindRequestParams(&clientRequest)
@@ -208,18 +208,18 @@ func (rh *resourceHandlerImpl[T]) DownloadFile(ctx *goservecontext.Request[T]) {
 
 }
 
-func (rh *resourceHandlerImpl[T]) UploadFile(ctx *goservecontext.Request[T]) {
+func (rh *resourceHandlerImpl[T]) UploadFile(ctx *goservectx.Request[T]) {
 
-	goserveerrohandler.Handler(func() {
+	goserveerror.Handler(func() {
 		requestBody := UploadFileMultipartBody{}
-		request.GetRequestBody(ctx, requestBody, func(ctx *goservecontext.Request[T], body UploadFileMultipartBody) {
+		request.GetRequestBody(ctx, requestBody, func(ctx *goservectx.Request[T], body UploadFileMultipartBody) {
 			clientRequest := UploadFileClientRequest{
 				Body: body,
 			}
 			err := ctx.BindRequestParams(&clientRequest)
-			contentType := ctx.Request.Header.Get(goservecontext.ContentType)
+			contentType := ctx.Request.Header.Get(goservectx.ContentType)
 			// Try to load form param to the body struct. File form will be ignored.
-			if err == nil && strings.Contains(contentType, goservecontext.MultipartFormData) {
+			if err == nil && strings.Contains(contentType, goservectx.MultipartFormData) {
 				_ = goservereflect.ParamsExtract(&clientRequest.Body,
 					goservereflect.ParamsExtractorSource{
 						Tree: ctx.FormValues(),
@@ -233,7 +233,7 @@ func (rh *resourceHandlerImpl[T]) UploadFile(ctx *goservecontext.Request[T]) {
 			}
 
 			rh.Service.UploadFile(clientRequest, ctx)
-		}, func(ctx *goservecontext.Request[T], err error) {
+		}, func(ctx *goservectx.Request[T], err error) {
 			ctx.InternalServerError("Internal server error")
 		})
 	}, func(err error) {
@@ -243,9 +243,9 @@ func (rh *resourceHandlerImpl[T]) UploadFile(ctx *goservecontext.Request[T]) {
 
 }
 
-func (rh *resourceHandlerImpl[T]) HealthGet(ctx *goservecontext.Request[T]) {
+func (rh *resourceHandlerImpl[T]) HealthGet(ctx *goservectx.Request[T]) {
 
-	goserveerrohandler.Handler(func() {
+	goserveerror.Handler(func() {
 
 		rh.Service.HealthGet(ctx)
 
@@ -266,28 +266,28 @@ type AuthorizationGenRequest = UserInfo
 type UploadFileRequest UploadFileMultipartBody
 
 // resourceHandler represents all server handlers.
-type resourceHandler[T goservecontext.Principal] interface {
+type resourceHandler[T goservectx.Principal] interface {
 	// Get api access authorization token
 	// (POST /authorization)
-	GetAuthorization(ctx *goservecontext.Request[T])
+	GetAuthorization(ctx *goservectx.Request[T])
 	// Return a user authorization data that can be used to access the api
 	// (POST /authorization/gen)
-	AuthorizationGen(ctx *goservecontext.Request[T])
+	AuthorizationGen(ctx *goservectx.Request[T])
 	// Delete a file or dir by name
 	// (DELETE /files)
-	Delete(ctx *goservecontext.Request[T])
+	Delete(ctx *goservectx.Request[T])
 	// List available files from storage path
 	// (GET /files)
-	List(ctx *goservecontext.Request[T])
+	List(ctx *goservectx.Request[T])
 	// Download a file by name
 	// (GET /files/download)
-	DownloadFile(ctx *goservecontext.Request[T])
+	DownloadFile(ctx *goservectx.Request[T])
 	// Upload a single file
 	// (POST /files/upload)
-	UploadFile(ctx *goservecontext.Request[T])
+	UploadFile(ctx *goservectx.Request[T])
 	// Check application status
 	// (GET /health)
-	HealthGet(ctx *goservecontext.Request[T])
+	HealthGet(ctx *goservectx.Request[T])
 }
 
 type GetAuthorizationClientRequest struct {
@@ -339,36 +339,36 @@ type UploadFileClientRequest struct {
 type HealthGetClientRequest struct {
 }
 
-type ApiRequestService[T goservecontext.Principal] interface {
+type ApiRequestService[T goservectx.Principal] interface {
 
 	// GetAuthorization -> POST: /authorization
-	GetAuthorization(request GetAuthorizationClientRequest, ctx *goservecontext.Request[T])
+	GetAuthorization(request GetAuthorizationClientRequest, ctx *goservectx.Request[T])
 
 	// AuthorizationGen -> POST: /authorization/gen
-	AuthorizationGen(request AuthorizationGenClientRequest, ctx *goservecontext.Request[T])
+	AuthorizationGen(request AuthorizationGenClientRequest, ctx *goservectx.Request[T])
 
 	// Delete -> DELETE: /files  required scopes ["resource:files:delete"]
-	Delete(request DeleteClientRequest, ctx *goservecontext.Request[T])
+	Delete(request DeleteClientRequest, ctx *goservectx.Request[T])
 
 	// List -> GET: /files  required scopes ["resource:files:list:all"]
-	List(request ListClientRequest, ctx *goservecontext.Request[T])
+	List(request ListClientRequest, ctx *goservectx.Request[T])
 
 	// DownloadFile -> GET: /files/download  required scopes ["resource:files:download"]
-	DownloadFile(request DownloadFileClientRequest, ctx *goservecontext.Request[T])
+	DownloadFile(request DownloadFileClientRequest, ctx *goservectx.Request[T])
 
 	// UploadFile -> POST: /files/upload  required scopes ["resource:files:upload"]
-	UploadFile(request UploadFileClientRequest, ctx *goservecontext.Request[T])
+	UploadFile(request UploadFileClientRequest, ctx *goservectx.Request[T])
 
 	// HealthGet -> GET: /health
-	HealthGet(ctx *goservecontext.Request[T])
+	HealthGet(ctx *goservectx.Request[T])
 }
 
-type resourceHandlerImpl[T goservecontext.Principal] struct {
+type resourceHandlerImpl[T goservectx.Principal] struct {
 	Service ApiRequestService[T]
 }
 
 // ---
-func apiResourceRegister[T goservecontext.Principal](server server.Api[T], handler resourceHandler[T]) {
+func apiResourceRegister[T goservectx.Principal](server server.Api[T], handler resourceHandler[T]) {
 	server.PublicRouter(handler.GetAuthorization, "/authorization", "POST")
 
 	server.PublicRouter(handler.AuthorizationGen, "/authorization/gen", "POST")
@@ -394,7 +394,7 @@ func apiResourceRegister[T goservecontext.Principal](server server.Api[T], handl
 //   - ApiRequestService.DownloadFile
 //   - ApiRequestService.UploadFile
 //   - ApiRequestService.HealthGet
-func RequestServiceHandler[T goservecontext.Principal](server server.Api[T], service ApiRequestService[T]) {
+func RequestServiceHandler[T goservectx.Principal](server server.Api[T], service ApiRequestService[T]) {
 	handler := &resourceHandlerImpl[T]{
 		Service: service,
 	}
