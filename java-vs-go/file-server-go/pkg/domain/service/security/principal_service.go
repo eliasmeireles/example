@@ -1,6 +1,7 @@
 package security
 
 import (
+	"file-server-go/pkg/domain/model"
 	"file-server-go/pkg/domain/repository"
 	goservecontext "github.com/softwareplace/goserve/context"
 	"github.com/softwareplace/goserve/security/principal"
@@ -13,10 +14,10 @@ type principalServiceImpl struct {
 
 var (
 	principalServiceOnce     sync.Once
-	principalServiceInstance principal.Service[*goservecontext.DefaultContext]
+	principalServiceInstance principal.Service[*model.User]
 )
 
-func New() principal.Service[*goservecontext.DefaultContext] {
+func New() principal.Service[*model.User] {
 	principalServiceOnce.Do(func() {
 		principalServiceInstance = &principalServiceImpl{
 			repository: repository.NewUserRepository(),
@@ -25,16 +26,15 @@ func New() principal.Service[*goservecontext.DefaultContext] {
 	return principalServiceInstance
 }
 
-func (p principalServiceImpl) LoadPrincipal(ctx *goservecontext.Request[*goservecontext.DefaultContext]) bool {
+func (p principalServiceImpl) LoadPrincipal(ctx *goservecontext.Request[*model.User]) bool {
 	matchingUser, err := p.repository.GetByAuthToken(ctx.AccessId)
 
 	if err != nil {
 		return false
 	}
 
-	context := goservecontext.NewDefaultCtx()
-	context.SetRoles(matchingUser.Roles...)
-	context.SetEncryptedPassword(matchingUser.Password)
-	ctx.Principal = &context
+	m := &matchingUser
+	ctx.Principal = &m
+
 	return true
 }

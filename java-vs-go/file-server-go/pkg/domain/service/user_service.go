@@ -1,8 +1,9 @@
 package service
 
 import (
+	"file-server-go/pkg/domain/model"
 	"file-server-go/pkg/domain/repository"
-	goservecontext "github.com/softwareplace/goserve/context"
+	"fmt"
 	"github.com/softwareplace/goserve/security"
 	"github.com/softwareplace/goserve/security/login"
 	"sync"
@@ -10,17 +11,17 @@ import (
 )
 
 type userLoginServiceImpl struct {
-	login.DefaultPasswordValidator[*goservecontext.DefaultContext]
-	securityService security.Service[*goservecontext.DefaultContext]
+	login.DefaultPasswordValidator[*model.User]
+	securityService security.Service[*model.User]
 	repository      repository.UserRepository
 }
 
 var (
 	loginServiceOnce     sync.Once
-	loginServiceInstance login.Service[*goservecontext.DefaultContext]
+	loginServiceInstance login.Service[*model.User]
 )
 
-func GetLoginService(securityService security.Service[*goservecontext.DefaultContext]) login.Service[*goservecontext.DefaultContext] {
+func GetLoginService(securityService security.Service[*model.User]) login.Service[*model.User] {
 	loginServiceOnce.Do(func() {
 		loginServiceInstance = &userLoginServiceImpl{
 			securityService: securityService,
@@ -31,21 +32,21 @@ func GetLoginService(securityService security.Service[*goservecontext.DefaultCon
 	return loginServiceInstance
 }
 
-func (u userLoginServiceImpl) SecurityService() security.Service[*goservecontext.DefaultContext] {
+func (u userLoginServiceImpl) SecurityService() security.Service[*model.User] {
 	return u.securityService
 }
 
-func (u userLoginServiceImpl) Login(user login.User) (*goservecontext.DefaultContext, error) {
+func (u userLoginServiceImpl) Login(user login.User) (*model.User, error) {
 	matchingUser, err := u.repository.GetByUsername(user.Username)
 	if err != nil {
 		return nil, err
 	}
 
-	ctx := goservecontext.NewDefaultCtx()
-	ctx.SetEncryptedPassword(matchingUser.Password)
-	ctx.SetRoles(matchingUser.Roles...)
+	if u.IsValidPassword(user, &matchingUser) {
+		return &matchingUser, nil
+	}
 
-	return ctx, nil
+	return nil, fmt.Errorf("invalid username or password")
 }
 
 func (u userLoginServiceImpl) TokenDuration() time.Duration {

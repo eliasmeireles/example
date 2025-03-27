@@ -15,6 +15,10 @@ import (
 	"github.com/softwareplace/goserve/server"
 )
 
+const (
+	OAuth2Scopes = "OAuth2.Scopes"
+)
+
 // Authorization defines model for Authorization.
 type Authorization = Response
 
@@ -343,16 +347,16 @@ type ApiRequestService[T goservecontext.Principal] interface {
 	// AuthorizationGen -> POST: /authorization/gen
 	AuthorizationGen(request AuthorizationGenClientRequest, ctx *goservecontext.Request[T])
 
-	// Delete -> DELETE: /files
+	// Delete -> DELETE: /files  required scopes ["resource:files:delete"]
 	Delete(request DeleteClientRequest, ctx *goservecontext.Request[T])
 
-	// List -> GET: /files
+	// List -> GET: /files  required scopes ["resource:files:list:all"]
 	List(request ListClientRequest, ctx *goservecontext.Request[T])
 
-	// DownloadFile -> GET: /files/download
+	// DownloadFile -> GET: /files/download  required scopes ["resource:files:download"]
 	DownloadFile(request DownloadFileClientRequest, ctx *goservecontext.Request[T])
 
-	// UploadFile -> POST: /files/upload
+	// UploadFile -> POST: /files/upload  required scopes ["resource:files:upload"]
 	UploadFile(request UploadFileClientRequest, ctx *goservecontext.Request[T])
 
 	// HealthGet -> GET: /health
@@ -369,13 +373,13 @@ func apiResourceRegister[T goservecontext.Principal](server server.Api[T], handl
 
 	server.PublicRouter(handler.AuthorizationGen, "/authorization/gen", "POST")
 
-	server.PublicRouter(handler.Delete, "/files", "DELETE")
+	server.Add(handler.Delete, "/files", "DELETE", []string{"resource:files:delete"}...)
 
-	server.PublicRouter(handler.List, "/files", "GET")
+	server.Add(handler.List, "/files", "GET", []string{"resource:files:list:all"}...)
 
-	server.PublicRouter(handler.DownloadFile, "/files/download", "GET")
+	server.Add(handler.DownloadFile, "/files/download", "GET", []string{"resource:files:download"}...)
 
-	server.PublicRouter(handler.UploadFile, "/files/upload", "POST")
+	server.Add(handler.UploadFile, "/files/upload", "POST", []string{"resource:files:upload"}...)
 
 	server.PublicRouter(handler.HealthGet, "/health", "GET")
 

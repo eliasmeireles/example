@@ -102,6 +102,9 @@ paths:
       summary: Upload a single file
       parameters:
         - $ref: "#/components/parameters/AccessToken"
+      security:
+        - OAuth2:
+            - resource:files:upload
       operationId: uploadFile
       requestBody:
         required: true
@@ -141,6 +144,9 @@ paths:
         - File
       summary: Download a file by name
       operationId: downloadFile
+      security:
+        - OAuth2:
+            - resource:files:download
       parameters:
         - name: filePath
           in: query
@@ -174,6 +180,9 @@ paths:
           required: true
           schema:
             type: string
+      security:
+        - OAuth2:
+            - resource:files:delete
       responses:
         '200':
           description: Successful operation
@@ -193,6 +202,9 @@ paths:
         - File
       summary: List available files from storage path
       operationId: list
+      security:
+        - OAuth2:
+            - resource:files:list:all
       parameters:
         - $ref: "#/components/parameters/AccessToken"
         - name: resource
@@ -224,7 +236,7 @@ components:
       name: Authorization
       schema:
         type: string
-      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZzJMaUluNFhUcXduUWNYYUlrRkdwZ1hLNnNsaGVuRUM3ZDhMa1Zpb0M3TUd1aWlzUzNYaCIsIjBTdmhGa1NlMmFBVG16UDFvcmxjVDNKT1M5Y3JnUmVtM0ZiREpaQ0lsQnJOQ0FQTVVnPT0iLCJPZnFwU21uUHR5ZHg0RDdNKzFwY0JHVVh1NmRXQlE1TWkzUjZjdVdjUkFOcS9mVHUrN0tQIiwiZHpyM0pvcHV5VUV0bDZMQ2tDSkZXbng4R2NoUDVDN29qTHdvZnByUVI1amkxV29wVEE9PSJdLCJleHAiOjE3NDMxMTcyMjcsImlhdCI6MTc0MzExMzYyNywiaXNzIjoiZmlsZS1zZXJ2ZXItZ28iLCJzdWIiOiJWSTBSZkFWWStKOEorUW5nOVZERDBMcDFoV2JMMmdjWVRTNGtmL1ViakRBR3p5WURxeC9aQ1VTR3ByOXdwK29FOEQzYUxTWXp6NnhZalBpNzJsTmRnSHJzL21NbW5uTDdyQW41aVE9PSJ9.lk_7YHB2e7axDCrxoxY-zmMl1Z1yAd1cC375hK2slTw
 
   schemas:
     Data:
@@ -296,6 +308,6 @@ components:
       properties:
         jwt:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZzJMaUluNFhUcXduUWNYYUlrRkdwZ1hLNnNsaGVuRUM3ZDhMa1Zpb0M3TUd1aWlzUzNYaCIsIjBTdmhGa1NlMmFBVG16UDFvcmxjVDNKT1M5Y3JnUmVtM0ZiREpaQ0lsQnJOQ0FQTVVnPT0iLCJPZnFwU21uUHR5ZHg0RDdNKzFwY0JHVVh1NmRXQlE1TWkzUjZjdVdjUkFOcS9mVHUrN0tQIiwiZHpyM0pvcHV5VUV0bDZMQ2tDSkZXbng4R2NoUDVDN29qTHdvZnByUVI1amkxV29wVEE9PSJdLCJleHAiOjE3NDMxMTcyMjcsImlhdCI6MTc0MzExMzYyNywiaXNzIjoiZmlsZS1zZXJ2ZXItZ28iLCJzdWIiOiJWSTBSZkFWWStKOEorUW5nOVZERDBMcDFoV2JMMmdjWVRTNGtmL1ViakRBR3p5WURxeC9aQ1VTR3ByOXdwK29FOEQzYUxTWXp6NnhZalBpNzJsTmRnSHJzL21NbW5uTDdyQW41aVE9PSJ9.lk_7YHB2e7axDCrxoxY-zmMl1Z1yAd1cC375hK2slTw
       required:
         - jwt

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"file-server-go/gen"
+	"file-server-go/pkg/domain/model"
 	"file-server-go/pkg/domain/service"
 	"file-server-go/pkg/provider"
 	"fmt"
@@ -19,7 +20,7 @@ type FileHandler struct {
 
 func (r resourceHandler) Delete(
 	request gen.DeleteClientRequest,
-	ctx *goservecontext.Request[*goservecontext.DefaultContext],
+	ctx *goservecontext.Request[*model.User],
 ) {
 	err := r.storageService.Delete(request.FilePath)
 	if err != nil {
@@ -43,7 +44,7 @@ func (r resourceHandler) Delete(
 
 func (r resourceHandler) List(
 	request gen.ListClientRequest,
-	ctx *goservecontext.Request[*goservecontext.DefaultContext],
+	ctx *goservecontext.Request[*model.User],
 ) {
 	dirName := "/"
 
@@ -62,7 +63,7 @@ func (r resourceHandler) List(
 
 func (r resourceHandler) DownloadFile(
 	request gen.DownloadFileClientRequest,
-	ctx *goservecontext.Request[*goservecontext.DefaultContext],
+	ctx *goservecontext.Request[*model.User],
 ) {
 	// Download the file
 	file, err := r.storageService.DownloadFile(request.FilePath)
@@ -92,7 +93,7 @@ func (r resourceHandler) DownloadFile(
 
 func (r resourceHandler) UploadFile(
 	request gen.UploadFileClientRequest,
-	ctx *goservecontext.Request[*goservecontext.DefaultContext],
+	ctx *goservecontext.Request[*model.User],
 ) {
 
 	// Parse the multipart form

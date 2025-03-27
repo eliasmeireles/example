@@ -3,6 +3,11 @@
     "username": "file-server@user.com",
     "password": "$2a$10$r6V3BbLQbQEaBaZRwlGPnuKspLSiutAqYeMRRkMK9pM2GNdVhEbJG",
     "authToken": "$2a$10$..szX9/A12GLh2WS5rUqfu3UbQoBfflU3qp4BtCBdMPLWBm7DVwVm",
-    "roles": []
+    "roles": [
+      "resource:files:list:all",
+      "resource:files:upload",
+      "resource:files:download",
+      "resource:files:delete"
+    ]
   }
 ]
