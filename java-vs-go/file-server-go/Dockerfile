@@ -43,7 +43,8 @@ ENV ENV_STORAGE_PATH /file-server
 ENV API_SECRET_AUTHORIZATION fdotWXwes9ngUblnI9owMP2Z
 ENV AUTHORIZATION_RESOURCE_PATH /opt/resources/users.json
 ENV OPENAPI_RESOURCE_PATH /opt/resources/openapi.yaml
-
+ENV JWT_ISSUER file-server-go
+ENV CONTEXT_PATH /api/file-server/v1/
 ENV PORT $PORT
 
 ENV TZ America/Sao_Paulo

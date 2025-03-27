@@ -11,4 +11,7 @@ config:
 
 run:
 	@make config
-	@AUTHORIZATION_RESOURCE_PATH=./resources/users.json API_SECRET_AUTHORIZATION=fdotWXwes9ngUblnI9owMP2Z  go run ./cmd/server/main.go
+	@JWT_ISSUER=file-server-go AUTHORIZATION_RESOURCE_PATH=./resources/users.json API_SECRET_AUTHORIZATION=fdotWXwes9ngUblnI9owMP2Z  go run ./cmd/server/main.go
+
+logs:
+	@docker logs -f file-server-go
