@@ -16,7 +16,6 @@ func main() {
 
 	server.Default().
 		LoginService(provider.UserService).
-		PrincipalService(provider.PrincipalService).
 		EmbeddedServer(handler.EmbeddedServer).
 		SwaggerDocHandler(appEnv.OpenapiResourcePath).
 		StartServer()
