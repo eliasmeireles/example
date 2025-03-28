@@ -124,6 +124,7 @@
             <th>Quantidade</th>
             <th>Preço Unitário</th>
             <th>Valor Líquido</th>
+            <th>CNPJ</th>
         </tr>
         </thead>
         <tbody>
@@ -198,6 +199,7 @@
                         <td>${produto.quantidade}</td>
                         <td>${produto.preco_unitario}</td>
                         <td>R$ ${produto.valor_liquido.toFixed(2).replace('.', ',')}</td>
+                        <td><a href="https://www.google.com/search?q=CNPJ de ${produto.nome}" target="_blank">CNPJ</a></td>
                     `;
 
                 tbody.appendChild(tr);
