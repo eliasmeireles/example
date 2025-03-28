@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filtro de Produtos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .filters {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .product-name {
+            width: 200px;
+            height: 30px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+            margin-top: 16px;
+        }
+
+        .total {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .checkbox-group-container, .product-name-container {
+            margin-top: 16px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+
+        #total-container {
+            margin: 15px 0;
+            font-size: 1.1em;
+        }
+        .filter-label {
+            display: block;
+            font-weight: bold;
+            font-size: 1.1em;
+            width: 100%;
+        }
+        .filter {
+            margin-top: 16px;
+            padding: 10px;
+            height: 40px;
+            width: 155px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Filtro de Produtos</h1>
+
+    <div class="filters">
+
+        <div class="checkbox-group-container">
+            <label class="filter-label">Tipos de Evento:</label>
+            <div class="checkbox-group" id="tipo-evento-container">
+                <!-- Os checkboxes serão preenchidos via JavaScript -->
+            </div>
+        </div>
+
+        <div class="product-name-container">
+            <label class="filter-label" for="nome">Nome do Produto (parte do nome):</label>
+            <input type="text" id="nome" class="product-name" placeholder="Ex: BRAS3 ou FIAGRO">
+        </div>
+
+        <button class="filter" onclick="filtrar()">Filtrar</button>
+    </div>
+
+    <div id="total-container">
+        Total encontrado: <span id="total">R$ 0,00</span> (<span id="count">0</span> itens)
+    </div>
+
+    <table id="resultados">
+        <thead>
+        <tr>
+            <th>Produto</th>
+            <th>Tipo de Evento</th>
+            <th>Instituição</th>
+            <th>Quantidade</th>
+            <th>Preço Unitário</th>
+            <th>Valor Líquido</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Os resultados serão preenchidos via JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Carrega os tipos de evento disponíveis
+    async function carregarTiposEvento() {
+        try {
+            const response = await fetch('/api/produtos');
+            const data = await response.json();
+
+            const tiposUnicos = [...new Set(data.produtos.map(p => p.tipo_evento))];
+            const container = document.getElementById('tipo-evento-container');
+
+            tiposUnicos.forEach(tipo => {
+                if (tipo && tipo.length > 0) {
+                    const div = document.createElement('div');
+                    div.className = 'checkbox-item';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `tipo-${tipo}`;
+                    checkbox.value = tipo;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `tipo-${tipo}`;
+                    label.textContent = tipo;
+
+                    div.appendChild(checkbox);
+                    div.appendChild(label);
+                    container.appendChild(div);
+                }
+            });
+        } catch (error) {
+            console.error('Erro ao carregar tipos de evento:', error);
+        }
+    }
+
+    // Filtra os produtos
+    async function filtrar() {
+        try {
+            const nome = document.getElementById('nome').value.toLowerCase();
+            const checkboxes = document.querySelectorAll('#tipo-evento-container input[type="checkbox"]:checked');
+            const tiposEvento = Array.from(checkboxes).map(cb => cb.value);
+
+            let url = '/api/produtos?';
+            if (nome) url += `nome=${encodeURIComponent(nome)}&`;
+            tiposEvento.forEach(tipo => {
+                url += `tipo_evento=${encodeURIComponent(tipo)}&`;
+            });
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Erro na requisição');
+
+            const data = await response.json();
+
+            // Atualiza a tabela
+            const tbody = document.querySelector('#resultados tbody');
+            tbody.innerHTML = '';
+
+            data.produtos.forEach(produto => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                        <td>${produto.nome}</td>
+                        <td>${produto.tipo_evento}</td>
+                        <td>${produto.instituicao}</td>
+                        <td>${produto.quantidade}</td>
+                        <td>${produto.preco_unitario}</td>
+                        <td>R$ ${produto.valor_liquido.toFixed(2).replace('.', ',')}</td>
+                    `;
+
+                tbody.appendChild(tr);
+            });
+
+            // Atualiza o total - CORREÇÃO AQUI
+            const totalElement = document.getElementById('total');
+            const countElement = document.getElementById('count');
+
+            if (totalElement && countElement) {
+                totalElement.textContent = `R$ ${data.total.toFixed(2).replace('.', ',')}`;
+                countElement.textContent = data.count;
+            } else {
+                console.error('Elementos totais não encontrados');
+            }
+        } catch (error) {
+            console.error('Erro ao filtrar:', error);
+            alert('Ocorreu um erro ao filtrar os dados. Verifique o console para mais detalhes.');
+        }
+    }
+
+    // Inicializa a página
+    window.onload = function () {
+        carregarTiposEvento();
+    };
+</script>
+</body>
+</html>
