@@ -1,6 +1,7 @@
 package model
 
 type Produto struct {
+	Ticket        string  `json:"ticket"`
 	Nome          string  `json:"nome"`
 	TipoEvento    string  `json:"tipo_evento"`
 	Instituicao   string  `json:"instituicao"`

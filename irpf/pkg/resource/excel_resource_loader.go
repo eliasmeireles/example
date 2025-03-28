@@ -31,7 +31,13 @@ func LoadExcelData(filename string) error {
 			fmt.Sscanf(valorStr, "%f", &valorLiquido)
 		}
 
+		ticket := strings.TrimSpace(row[0])
+		if idx := strings.Index(ticket, "-"); idx != -1 {
+			ticket = strings.TrimSpace(ticket[:idx])
+		}
+
 		produto := model.Produto{
+			Ticket:        ticket,
 			Nome:          strings.TrimSpace(row[0]),
 			TipoEvento:    strings.TrimSpace(row[2]),
 			Instituicao:   strings.TrimSpace(row[3]),

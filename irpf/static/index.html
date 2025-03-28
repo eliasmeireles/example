@@ -52,9 +52,11 @@
             font-weight: bold;
             margin-top: 10px;
         }
+
         .checkbox-group-container, .product-name-container {
             margin-top: 16px;
         }
+
         .checkbox-group {
             display: flex;
             flex-wrap: wrap;
@@ -71,12 +73,14 @@
             margin: 15px 0;
             font-size: 1.1em;
         }
+
         .filter-label {
             display: block;
             font-weight: bold;
             font-size: 1.1em;
             width: 100%;
         }
+
         .filter {
             margin-top: 16px;
             padding: 10px;
@@ -118,6 +122,7 @@
     <table id="resultados">
         <thead>
         <tr>
+            <th>Ticket</th>
             <th>Produto</th>
             <th>Tipo de Evento</th>
             <th>Instituição</th>
@@ -193,6 +198,7 @@
                 const tr = document.createElement('tr');
 
                 tr.innerHTML = `
+                        <td>${produto.ticket}</td>
                         <td>${produto.nome}</td>
                         <td>${produto.tipo_evento}</td>
                         <td>${produto.instituicao}</td>
