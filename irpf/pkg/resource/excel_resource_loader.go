@@ -5,10 +5,26 @@ import (
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"irpf/pkg/model"
 	"irpf/pkg/storage"
+	"irpf/pkg/utils"
+	"log"
 	"strings"
 )
 
+func ReloadProducts() {
+	filePath := utils.GetEnvOrDefault("EXCEL_FILE", "")
+	if filePath == "" {
+		log.Fatalf("Env EXCEL_FILE was not set.")
+	}
+
+	err := LoadExcelData(filePath)
+	if err != nil {
+		log.Fatalf("Erro ao carregar dados do Excel: %v", err)
+	}
+}
+
 func LoadExcelData(filename string) error {
+	var localProducts []model.Produto
+
 	f, err := excelize.OpenFile(filename)
 	if err != nil {
 		return err
@@ -17,6 +33,8 @@ func LoadExcelData(filename string) error {
 	// Assume que os dados estão na primeira planilha
 	rows := f.GetRows(f.GetSheetName(1))
 
+	rmLink := "/api/produtos/remover?produto="
+	
 	// Pula o cabeçalho e processa as linhas
 	for _, row := range rows[1:] {
 		if len(row) < 7 {
@@ -44,10 +62,12 @@ func LoadExcelData(filename string) error {
 			Quantidade:    strings.TrimSpace(row[4]),
 			PrecoUnitario: strings.TrimSpace(row[5]),
 			ValorLiquido:  valorLiquido,
+			RmLink:        rmLink + ticket,
 		}
 
-		storage.Products = append(storage.Products, produto)
+		localProducts = append(localProducts, produto)
 	}
 
+	storage.Products = localProducts
 	return nil
 }

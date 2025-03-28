@@ -92,6 +92,31 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
+        .refresh {
+            margin-top: 16px;
+            margin-left: 16px;
+            padding: 10px;
+            height: 40px;
+            width: 155px;
+            background: #03871a;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .remove-product {
+            margin-top: 16px;
+            padding: 10px;
+            height: 40px;
+            width: 155px;
+            background: #ff0000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -112,7 +137,10 @@
             <input type="text" id="nome" class="product-name" placeholder="Ex: BRAS3 ou FIAGRO">
         </div>
 
-        <button class="filter" onclick="filtrar()">Filtrar</button>
+        <div class="filter-container">
+            <button class="filter" onclick="filtrar()">Filtrar</button>
+            <button class="refresh" onclick="filtrar(null, true)">Recarregar</button>
+        </div>
     </div>
 
     <div id="total-container">
@@ -129,7 +157,7 @@
             <th>Quantidade</th>
             <th>Preço Unitário</th>
             <th>Valor Líquido</th>
-            <th>Pesquisar CNPJ</th>
+            <th>Remover Item</th>
         </tr>
         </thead>
         <tbody>
@@ -173,8 +201,16 @@
     }
 
     // Filtra os produtos
-    async function filtrar() {
+    async function filtrar(removeLink, reload = false) {
         try {
+            if (reload) {
+                const response = await fetch('/api/reload');
+                console.log(`Product removed success fully: ${response.status}`)
+            }
+            if (removeLink) {
+                const response = await fetch(removeLink);
+                console.log(`Product removed success fully: ${response.status}`)
+            }
             const nome = document.getElementById('nome').value.toLowerCase();
             const checkboxes = document.querySelectorAll('#tipo-evento-container input[type="checkbox"]:checked');
             const tiposEvento = Array.from(checkboxes).map(cb => cb.value);
@@ -198,14 +234,14 @@
                 const tr = document.createElement('tr');
 
                 tr.innerHTML = `
-                        <td>${produto.ticket}</td>
+                        <td><a href="https://www.google.com/search?q=Qual é o CNPJ de ${produto.nome}" target="_blank">${produto.ticket}</a></td>
                         <td>${produto.nome}</td>
                         <td>${produto.tipo_evento}</td>
                         <td>${produto.instituicao}</td>
                         <td>${produto.quantidade}</td>
                         <td>${produto.preco_unitario}</td>
                         <td>R$ ${produto.valor_liquido.toFixed(2).replace('.', ',')}</td>
-                        <td><a href="https://www.google.com/search?q=Qual é o CNPJ de ${produto.nome}" target="_blank">Pesquisar CNPJ</a></td>
+                        <td><button class="remove-product" onclick="filtrar('${produto.rmLink}')">Remover</button></td>
                     `;
 
                 tbody.appendChild(tr);

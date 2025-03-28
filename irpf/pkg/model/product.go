@@ -8,4 +8,5 @@ type Produto struct {
 	Quantidade    string  `json:"quantidade"`
 	PrecoUnitario string  `json:"preco_unitario"`
 	ValorLiquido  float64 `json:"valor_liquido"`
+	RmLink        string  `json:"rmLink"`
 }

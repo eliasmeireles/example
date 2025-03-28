@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"irpf/pkg/model"
+	"irpf/pkg/resource"
 	"irpf/pkg/storage"
 	"irpf/pkg/utils"
 	"net/http"
@@ -11,6 +12,11 @@ import (
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, utils.GetEnvOrDefault("FRONTEND_FILE", "static/index.html"))
+}
+
+func ReloadProducts(w http.ResponseWriter, r *http.Request) {
+	resource.ReloadProducts()
+	w.WriteHeader(http.StatusOK)
 }
 
 func GetProdutos(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +41,31 @@ func GetProdutos(w http.ResponseWriter, r *http.Request) {
 		"produtos": resultados,
 		"total":    total,
 		"count":    len(resultados),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func RmProdutos(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	productName := strings.ToLower(query.Get("produto"))
+
+	var resultados []model.Produto
+	var removed []model.Produto
+
+	for _, p := range storage.Products {
+		if !strings.Contains(strings.ToLower(p.Nome), strings.ToLower(productName)) {
+			resultados = append(resultados, p)
+		} else {
+			removed = append(removed, p)
+		}
+	}
+
+	storage.Products = resultados
+
+	response := map[string]interface{}{
+		"removed": removed,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
