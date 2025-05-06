@@ -110,16 +110,12 @@ func (r resourceHandler) UploadFile(
 		return
 	}
 
-	// Extract other form fields
-	dirName := ctx.Request.FormValue("dirName")
-	fileName := ctx.Request.FormValue("fileName")
-
-	if dirName == "" || fileName == "" {
+	if request.Body.DirName == "" || request.Body.FileName == "" {
 		ctx.BadRequest("dirName and fileName are required")
 		return
 	}
 
-	fileInfo, err := r.storageService.SaveFile(file, fileHeader, dirName, fileName)
+	fileInfo, err := r.storageService.SaveFile(file, fileHeader, request.Body.DirName, request.Body.FileName)
 	if err != nil {
 		ctx.InternalServerError("Failed to save file: " + err.Error())
 		return

@@ -10,7 +10,7 @@ import (
 var (
 	AppEnv           = env.GetAppEnv()
 	PrincipalService = appsecurity.New()
-	SecurityService  = security.New(AppEnv.ApiSecretAuthorization, PrincipalService)
+	SecurityService  = security.New(PrincipalService)
 	UserService      = service.GetLoginService(SecurityService)
 	StorageService   = service.GetStorageService()
 )

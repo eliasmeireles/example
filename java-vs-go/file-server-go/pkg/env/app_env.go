@@ -11,7 +11,6 @@ import (
 type AppEnv struct {
 	OpenapiResourcePath       string
 	StoragePath               string
-	ApiSecretAuthorization    string
 	AuthorizationResourcePath string
 	MaxFileSize               int
 }
@@ -25,7 +24,6 @@ func SetAppEnv(appEnv *AppEnv) {
 func GetAppEnv() *AppEnv {
 	if env == nil {
 		storagePath := os.Getenv("ENV_STORAGE_PATH")
-		apiSecretAuthorization := os.Getenv("API_SECRET_AUTHORIZATION")
 		openapiResourcePath := os.Getenv("OPENAPI_RESOURCE_PATH")
 		authorizationResourcePath := os.Getenv("AUTHORIZATION_RESOURCE_PATH")
 
@@ -37,10 +35,6 @@ func GetAppEnv() *AppEnv {
 
 		if authorizationResourcePath == "" {
 			panic("Env AUTHORIZATION_RESOURCE_PATH is required but not set")
-		}
-
-		if apiSecretAuthorization == "" {
-			panic("Env API_SECRET_AUTHORIZATION is required but not set")
 		}
 
 		if openapiResourcePath == "" {
@@ -58,7 +52,6 @@ func GetAppEnv() *AppEnv {
 		env = &AppEnv{
 			OpenapiResourcePath:       openapiResourcePath,
 			StoragePath:               storagePath,
-			ApiSecretAuthorization:    apiSecretAuthorization,
 			AuthorizationResourcePath: authorizationResourcePath,
 			MaxFileSize:               getMaxFileSize(),
 		}
