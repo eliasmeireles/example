@@ -19,5 +19,14 @@ codegen:
 	 @touch ./gen/api.gen.go
 	 @oapi-codegen --config ./resources/config.yaml ./resources/openapi.yaml
 
+# Setup Buildx builder
+buildx:
+	@docker buildx create --name buildxBuilder --use
+	@docker buildx inspect buildxBuilder --bootstrap
+
+build:
+	@read -p "Enter the tag version: " TAG; \
+	 docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/eliasmeireles/go-file-server:$$TAG --push .
+
 logs:
 	@docker logs -f file-server-go
