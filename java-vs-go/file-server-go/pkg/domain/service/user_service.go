@@ -1,13 +1,15 @@
 package service
 
 import (
-	"file-server-go/pkg/domain/model"
-	"file-server-go/pkg/domain/repository"
 	"fmt"
-	"github.com/softwareplace/goserve/security"
-	"github.com/softwareplace/goserve/security/login"
 	"sync"
 	"time"
+
+	"github.com/softwareplace/goserve/security"
+	"github.com/softwareplace/goserve/security/login"
+
+	"file-server-go/pkg/domain/model"
+	"file-server-go/pkg/domain/repository"
 )
 
 type userLoginServiceImpl struct {
@@ -49,6 +51,6 @@ func (u userLoginServiceImpl) Login(user login.User) (*model.User, error) {
 	return nil, fmt.Errorf("invalid username or password")
 }
 
-func (u userLoginServiceImpl) TokenDuration() time.Duration {
+func (u userLoginServiceImpl) TokenDuration(principal *model.User) time.Duration {
 	return 1 * time.Hour
 }

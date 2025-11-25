@@ -1,12 +1,12 @@
 services:
-  ${PROJECT}:
+  file-server-java:
     build:
       dockerfile: Dockerfile
       context: .
       args:
         PORT: 8080
-    image: ${PROJECT}
-    container_name: ${PROJECT}
+    image: file-server-java
+    container_name: file-server-java
     restart: always
     deploy:
       resources:
@@ -14,7 +14,7 @@ services:
           cpus: "1"
           memory: "256M"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://172.17.0.1:8080/api/${PROJECT}/v1/health" ]
+      test: [ "CMD", "curl", "-f", "http://172.17.0.1:8080/api/file-server-java/v1/health" ]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -22,5 +22,5 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ~/${PROJECT}/go:/${PROJECT}
-      - ~/${PROJECT}/go/logs:/.logs
+      - ~/file-server-java/go:/file-server-java
+      - ~/file-server-java/go/logs:/.logs

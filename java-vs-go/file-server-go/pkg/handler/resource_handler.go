@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"sync"
+
+	"github.com/softwareplace/goserve/server"
+
 	"file-server-go/gen"
 	"file-server-go/pkg/domain/model"
 	"file-server-go/pkg/provider"
-	"github.com/softwareplace/goserve/server"
-	"sync"
 )
 
 type resourceHandler struct {

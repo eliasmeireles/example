@@ -2,17 +2,19 @@ package service
 
 import (
 	"encoding/json"
-	"file-server-go/gen"
-	"file-server-go/pkg/env"
-	"file-server-go/pkg/utils"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
+
+	"file-server-go/gen"
+	"file-server-go/pkg/env"
+	"file-server-go/pkg/utils"
 )
 
 type StorageService interface {

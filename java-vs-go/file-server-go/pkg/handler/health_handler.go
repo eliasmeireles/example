@@ -1,9 +1,10 @@
 package handler
 
 import (
+	goservecontext "github.com/softwareplace/goserve/context"
+
 	"file-server-go/gen"
 	"file-server-go/pkg/domain/model"
-	goservecontext "github.com/softwareplace/goserve/context"
 
 	"time"
 )

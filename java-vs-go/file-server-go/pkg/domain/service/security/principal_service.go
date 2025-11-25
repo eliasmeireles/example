@@ -1,11 +1,13 @@
 package security
 
 import (
-	"file-server-go/pkg/domain/model"
-	"file-server-go/pkg/domain/repository"
+	"sync"
+
 	goservecontext "github.com/softwareplace/goserve/context"
 	"github.com/softwareplace/goserve/security/principal"
-	"sync"
+
+	"file-server-go/pkg/domain/model"
+	"file-server-go/pkg/domain/repository"
 )
 
 type principalServiceImpl struct {

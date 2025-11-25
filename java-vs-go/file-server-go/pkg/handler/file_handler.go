@@ -1,17 +1,19 @@
 package handler
 
 import (
-	"file-server-go/gen"
-	"file-server-go/pkg/domain/model"
-	"file-server-go/pkg/domain/service"
-	"file-server-go/pkg/provider"
 	"fmt"
-	"github.com/labstack/gommon/log"
-	goservecontext "github.com/softwareplace/goserve/context"
 	"io"
 	"mime/multipart"
 	"path/filepath"
 	"time"
+
+	"github.com/labstack/gommon/log"
+	goservecontext "github.com/softwareplace/goserve/context"
+
+	"file-server-go/gen"
+	"file-server-go/pkg/domain/model"
+	"file-server-go/pkg/domain/service"
+	"file-server-go/pkg/provider"
 )
 
 type FileHandler struct {

@@ -2,12 +2,13 @@ package repository
 
 import (
 	"encoding/json"
-	"file-server-go/pkg/domain/model"
-	"file-server-go/pkg/env"
 	"fmt"
 	"log"
 	"os"
 	"sync"
+
+	"file-server-go/pkg/domain/model"
+	"file-server-go/pkg/env"
 )
 
 type UserRepository interface {

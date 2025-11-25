@@ -1,11 +1,12 @@
 package env
 
 import (
-	"file-server-go/pkg/utils"
 	"flag"
 	"os"
 	"strconv"
 	"strings"
+
+	"file-server-go/pkg/utils"
 )
 
 type AppEnv struct {

@@ -1,10 +1,11 @@
 package provider
 
 import (
+	"github.com/softwareplace/goserve/security"
+
 	"file-server-go/pkg/domain/service"
 	appsecurity "file-server-go/pkg/domain/service/security"
 	"file-server-go/pkg/env"
-	"github.com/softwareplace/goserve/security"
 )
 
 var (

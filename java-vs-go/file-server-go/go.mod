@@ -1,17 +1,19 @@
 module file-server-go
 
-go 1.24.2
+go 1.25
 
 require (
+	github.com/gorilla/mux v1.8.1
 	github.com/labstack/gommon v0.4.2
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/softwareplace/goserve v1.0.8-0.20250506221219-7d27e529dd85
+	github.com/softwareplace/goserve v1.0.9-0.20251115221012-d07153923f00
 )
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/antonfisher/nested-logrus-formatter v1.3.1 // indirect
+	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
 	github.com/getkin/kin-openapi v0.132.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.1 // indirect
@@ -23,7 +25,6 @@ require (
 	github.com/go-playground/validator/v10 v10.26.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect

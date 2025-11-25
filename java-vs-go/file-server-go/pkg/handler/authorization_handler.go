@@ -1,13 +1,15 @@
 package handler
 
 import (
-	"file-server-go/gen"
-	"file-server-go/pkg/domain/model"
-	"file-server-go/pkg/provider"
+	"time"
+
 	log "github.com/sirupsen/logrus"
 	goservecontext "github.com/softwareplace/goserve/context"
 	"github.com/softwareplace/goserve/security/login"
-	"time"
+
+	"file-server-go/gen"
+	"file-server-go/pkg/domain/model"
+	"file-server-go/pkg/provider"
 )
 
 type AuthorizationHandler struct {
@@ -32,7 +34,8 @@ func (r AuthorizationHandler) _authorizationGenerator(requestBody gen.UserInfo, 
 		ctx.Forbidden("Invalid username or password")
 		return
 	}
-	jwt, err := provider.SecurityService.Generate(login, r.loginService.TokenDuration())
+
+	jwt, err := provider.SecurityService.Generate(login, r.loginService.TokenDuration(login))
 
 	if err != nil {
 		log.Printf("LOGIN/JWT: Failed to generate JWT: %v", err)
