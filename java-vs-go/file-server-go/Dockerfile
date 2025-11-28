@@ -1,5 +1,5 @@
 # Use the official Golang image
-FROM golang:1.23-alpine as builder
+FROM golang:1.25-alpine as builder
 
 # Set the working directory
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 
 COPY . .
 
-RUN oapi-codegen --config resources/config.yaml resources/openapi.yaml
+RUN oapi-codegen --config ./resources/config.yaml ./resources/openapi.yaml
 
 # Download dependencies
 RUN go mod tidy

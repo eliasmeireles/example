@@ -25,8 +25,7 @@ buildx:
 	@docker buildx inspect buildxBuilder --bootstrap
 
 build:
-	@read -p "Enter the tag version: " TAG; \
-	 docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/eliasmeireles/go-file-server:$$TAG --push .
+	docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/eliasmeireles/go-file-server:v1.0.0 --push .
 
 logs:
 	@docker logs -f file-server-go
